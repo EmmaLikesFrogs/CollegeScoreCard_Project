@@ -40,6 +40,21 @@ combine_csv_files <- function(raw_file_paths) {
 }
 
 
-combined_data <- combine_csv_files(raw_file_paths)
+combined_df <- combine_csv_files(raw_file_paths)
 
 
+# determining completeness of each column to figure out which ones may be best to start looking at 
+total_col_entry <- nrow(combined_df)
+completeness <- c()
+for (i in 1:ncol(combined_df)){
+  freq_NULL <- table(combined_df[,..i])
+  count_of_null <- (freq_NULL['NULL']/total_col_entry)*100
+  completeness <- append(completeness, count_of_null)
+}
+total_null_feq <- data.frame(colnames(combined_df),completeness)%>%
+  # renaming the columns so it makes more sense (new name, old name)
+  rename('column' = 'colnames.combined_df.',
+         'Null freq' = 'completeness')
+
+# determining threshold for which columns we may want to look at based of completeness of each column
+subset_null_feq <-subset(x, x$`Null freq` <50)
