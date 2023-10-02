@@ -40,6 +40,14 @@ combine_csv_files <- function(raw_file_paths) {
 }
 
 
-combined_data <- combine_csv_files(raw_file_paths)
+combined_df <- as.data.frame(combine_csv_files(raw_file_paths))
 
+# determining completeness of each column to figure out which ones may be best to start looking at 
+# completeness <- c()
+names <-apply(combined_df, 2, function(x) sum(x !='NULL')/length(x) > 0.75)
 
+# test1<- as.data.frame(combined_df)
+trimmed_combined_df<-combined_df[, c(names)]
+
+write.csv(trimmed_combined_df,
+          "/Users/yuhanburgess/Documents/GitHub/DataMungingProject2/trimmed_combined_df.csv", row.names=TRUE)
