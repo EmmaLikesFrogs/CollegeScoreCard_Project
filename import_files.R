@@ -21,16 +21,28 @@ raw_file_paths <- raw_files  %>%
 # Some of the files do not have the same stricture time for each column (one column could be a double but then
 # a character in the next file).
 
-# combine_csv_files rbinds the files together even with these discrepencies 
+# combine_csv_files rbinds the files together even with these discrepancies 
 combine_csv_files <- function(raw_file_paths) {
   # Initialize an empty list to store data frames
   df_list <- list()
   
   # Loop through each CSV file and read it into a data frame
   for (file_path in raw_file_paths[,2]) {
-    #stringAsFactors doesn't assign strings to a facotr/ value (setting string to factor is more efficient)
-    # may run a little less efficient but because of size of data, it should be okay
+    
+    # finds the start year of each file
+    year_match <- regexpr("MERGED(\\d{4})", file_path)
+    
+    if (year_match != -1) {
+      year <- as.integer(substr(file_path, year_match + 6, year_match + 9))
+    } else {
+      year <- NA
+    }
+    
     df <- read.csv(file_path, stringsAsFactors = FALSE) 
+    
+    # creates a new column with the year of the csv file.
+    df$year <- year
+    
     df_list <- append(df_list, list(df))
   }
   
@@ -40,21 +52,14 @@ combine_csv_files <- function(raw_file_paths) {
 }
 
 
-combined_df <- combine_csv_files(raw_file_paths)
+combined_df<- combine_csv_files(raw_file_paths)
 
+# checking for 70% completeness in each column 
+names <-apply(combined_df, 2, function(x) sum(x !='NULL')/length(x) > 0.75)
 
-# determining completeness of each column to figure out which ones may be best to start looking at 
-total_col_entry <- nrow(combined_df)
-completeness <- c()
-for (i in 1:ncol(combined_df)){
-  freq_NULL <- table(combined_df[,..i])
-  count_of_null <- (freq_NULL['NULL']/total_col_entry)*100
-  completeness <- append(completeness, count_of_null)
-}
-total_null_feq <- data.frame(colnames(combined_df),completeness)%>%
-  # renaming the columns so it makes more sense (new name, old name)
-  rename('column' = 'colnames.combined_df.',
-         'Null freq' = 'completeness')
+test1<- as.data.frame(combined_df)
+trimmed_combined_df<-test1[, c(names)]
 
-# determining threshold for which columns we may want to look at based of completeness of each column
-subset_null_feq <-subset(x, x$`Null freq` <50)
+# creates a new csv file with all the dataframe merged
+write.csv(trimmed_combined_df,
+          "/Users/yuhanburgess/Documents/GitHub/DataMungingProject2/trimmed_combined_df.csv", row.names=TRUE)
