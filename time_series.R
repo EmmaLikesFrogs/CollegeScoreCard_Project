@@ -63,6 +63,11 @@ combined_df<- combine_csv_files(raw_file_paths)%>%
 # graph of enrollment of UC... form 2010 to present
 # UGDS: Enrollment of undergraduate certificate/degree-seeking students
 # INSTNM: Institution name
+
+
+# we can alter this if necessary and look at enrollemnt of schools in each state between a certain
+# time range
+# group = INSTNM allows for the analysis of each college over the years
 time_series <- ggplot(combined_df, aes(x = year, y = UGDS, group = INSTNM, color = INSTNM)) +
   geom_line()+labs(
     x = "Year",                 # X-axis label
