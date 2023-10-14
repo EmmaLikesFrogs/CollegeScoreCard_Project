@@ -58,8 +58,9 @@ df_unique <- state_data %>%
 
 ## ERROR: polygons doesn't do the correct gradient level
 ggplot() +
-  geom_polygon(data = state_data, aes(x = long, y = lat, group = group, fill = freq), size = 0, alpha = 0.9) +
+  geom_polygon(data = state_data, aes(x = long, y = lat, group = group, fill = freq), size = 0, alpha = 1.0) +
   geom_text(data = state_data, aes(x = x, y = y, label = id.y), color = "white", size = 3, alpha = 0.6) +
   scale_fill_gradient(low = "#69b3a2", high = "#FF0000", name = "Frequency") +
   labs(x = NULL, y = NULL) +
   theme_void()
+
