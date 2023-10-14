@@ -6,11 +6,11 @@ names <-apply(dataframe, 2, function(x) sum(x !='NULL')/length(x) > 0.75)
 trimmed_combined_df<-dataframe[, c(names)]
 
 # filtering based of predominately undergrad schools
-test1 <- subset(dataframe, dataframe$PREDDEG == 3)
+test1 <- subset(trimmed_combined_df, trimmed_combined_df$PREDDEG == 3)
 
-test2 <- dataframe %>%
-  filter(STABBR == 'AZ')%>%
-  filter(PREDDEG == 3)
+test2 <- trimmed_combined_df %>%
+  filter(PREDDEG == 3)%>%
+  filter(year > 1999)
 
 graphTest<- ggplot(test2, aes(x = ))
 # PCIP11: Percentage of degrees awarded in Computer & Information Sciences and Support Services
