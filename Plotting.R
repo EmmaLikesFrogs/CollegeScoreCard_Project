@@ -35,21 +35,31 @@ spdf_df <- fortify(spdf)
 # Calculate the centroid of each hexagon to add the label:
 centers <- cbind.data.frame(data.frame(gCentroid(spdf, byid=TRUE), id = spdf@data$iso3166_2), group = spdf_df$group, row.names = NULL)
 
+spdf_fortified <- spdf_df %>%
+  left_join(. , centers, by=c("group"="group")) 
+ggplot() +
+  geom_polygon(data = spdf_fortified, aes( x = long, y = lat, group = group), fill="skyblue", color="white") +
+  geom_text(data=centers, aes(x=x, y=y, label=id)) +
+  theme_void() +
+  coord_map()
+
 # Now I can plot this shape easily as described before:
 
 state_count <- read.csv('/Users/yuhanburgess/Documents/GitHub/DataMungingProject2/CollegeScorecard_Raw_Data_08032021/MERGED2019_20_PP.csv')%>%
   count(MERGED2019_20_PP,STABBR)
 
-colnames(state_count)[1] <- "id"
+colnames(state_count)[1] <- "id.y"
 
-state_data <- left_join(centers, state_count, by = "id")
+state_data <- left_join(spdf_fortified, state_count, by = "id.y")
 
-## ERROR: polygons don't have them in a shape of a polygon
+df_unique <- state_data %>%
+  group_by(id.y) %>%
+  slice(1)
+
+## ERROR: polygons doesn't do the correct gradient level
 ggplot() +
-  geom_polygon(data = state_data, aes(x = x, y = y, group = group, fill = freq), size = 0, alpha = 0.9) +
-  geom_text(data = state_data, aes(x = x, y = y, label = id), color = "white", size = 3, alpha = 0.6) +
+  geom_polygon(data = state_data, aes(x = long, y = lat, group = group, fill = freq), size = 0, alpha = 0.9) +
+  geom_text(data = state_data, aes(x = x, y = y, label = id.y), color = "white", size = 3, alpha = 0.6) +
   scale_fill_gradient(low = "#69b3a2", high = "#FF0000", name = "Frequency") +
   labs(x = NULL, y = NULL) +
   theme_void()
-
-
