@@ -1,0 +1,86 @@
+# About
+
+This project aims to conduct a high-level survey of the US Education System as of the academic year 2021-2022.
+
+# Dependencies
+```{r}
+library(dplyr)
+library(ggplot2)
+library(readr)
+```
+
+# Wrangling the Data
+```{r}
+df <- read_csv("/Users/annabutko/Documents/GitHub/DataMungingProject2/data/MERGED2021_22_PP.csv")
+
+# Change all NULL values into NA
+df <- df %>%
+  mutate_all(~ifelse(. == "NULL", NA, .))
+
+# REMOVING ROWS THAT ARE 90% INCOMPLETE 
+# Calculate the percentage of NA values for each row
+row_na_percent <- rowSums(is.na(df2)) / ncol(df2) * 100
+# Find rows with 90% or more NA values
+rows_with_90_percent_or_more_na <- which(row_na_percent >= 90)
+# Remove rows with 90% incomplete data
+df <- df %>%
+  filter(row_number() %in% rows_with_90_percent_or_more_na)
+```
+
+# For this Analysis, we will be selecting a subset of the variables.
+
+Variables of Interest:
+
+ADM_RATE_ALL
+Admission rate for all campuses
+
+TUITIONFEE_IN
+In-state tuition and fees
+
+TUITIONFEE_OUT
+Out-of-state tuition and fees
+
+Let's filter our data of interest and save it in the new data frame that we will be working with.
+```{r}
+# Define the columns of interest
+cols <- c('ADM_RATE_ALL', 'TUITIONFEE_IN', 'TUITIONFEE_OUT')
+
+# Subset the data frame to include only the specified columns
+subset_df <- df[, cols]
+
+# Remove rows with NA values in any of the specified columns
+subset_df <- subset_df[complete.cases(subset_df), ]
+```
+
+```{r}
+# Convert columns to numeric
+subset_df <- sapply(subset_df, as.numeric)
+
+# Calculate the correlation matrix
+cor_matrix <- cor(subset_df, use = "pairwise.complete.obs")
+colnames(cor_matrix) <- c("ADMISSION RATE", "IN STATE TUITION FEE", "OUT OF STATE TUITION FEE")
+rownames(cor_matrix) <- c("Admission Rate", "In State Tuition Fee", "Out of State Tuition Fee")
+
+# Create a plot
+dotchart(cor_matrix,
+         xlab = "Correlation Coefficient",
+         main = "Correlation Between Variables",
+         color = "#00008B",
+         pch = 19)
+```
+
+Explanation of the results:
+
+1. **Admission Rate 1.0, In State Tuition 0.32, Out of State Tuition 0.36**:
+   - The correlation coefficient between "Admission Rate" and "In State Tuition Fee" is 0.32. This positive correlation suggests that as the "In State Tuition Fee" increases, the "Admission Rate" tends to increase slightly. In other words, there is a weak positive relationship between higher in-state tuition fees and a slightly higher admission rate.
+   - Similarly, the correlation coefficient between "Admission Rate" and "Out of State Tuition Fee" is 0.36, indicating a weak positive relationship between higher out-of-state tuition fees and a slightly higher admission rate.
+
+2. **In State Tuition 1.0, Admission Rate 0.32, Out of State Tuition 0.74**:
+   - The correlation coefficient between "In State Tuition Fee" and "Admission Rate" is 0.32. This positive correlation suggests that as the "In State Tuition Fee" increases, the "Admission Rate" tends to increase slightly. In other words, there is a weak positive relationship between higher in-state tuition fees and a slightly higher admission rate.
+   - Similarly, the correlation coefficient between "In State Tuition Fee" and "Out of State Tuition Fee" is 0.74, indicating a strong positive relationship between higher in-state tuition fees and higher out-of-state tuition fees.
+
+3. **Out of State Tuition 1.0, Admission Rate 0.36, In State Tuition 0.74**:
+   - The correlation coefficient between "Out of State Tuition Fee" and "Admission Rate" is 0.36, indicating a positive relationship. This suggests that as the "Out of State Tuition Fee" increases, the "Admission Rate" tends to increase slightly. In other words, there is a weak positive relationship between higher out-of-state tuition fees and a slightly higher admission rate.
+   - Similarly, the correlation coefficient between "Out of State Tuition Fee" and "In State Tuition Fee" is 0.74, indicating a strong positive relationship between higher out-of-state tuition fees and higher in-state tuition fees.
+
+In summary, the analysis provides insights into the relationships between admission rates and tuition fees, both in-state and out-of-state. The correlations suggest that there is a slight tendency for institutions with higher tuition fees (both in-state and out-of-state) to have a slightly higher admission rate, but the relationships are relatively weak.
