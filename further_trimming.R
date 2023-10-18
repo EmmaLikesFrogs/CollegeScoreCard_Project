@@ -20,7 +20,10 @@ df <- read_csv("Documents/GitHub/DataMungingProject2/CollegeScorecard_Raw_Data_0
 df1 <- df %>%
   mutate_all(~ifelse(. == "NULL", NA, .)) # changing all NULL into NA
 
-df2 <- df1[, 1:450] # trimming df to look at range of variables that will mostlikly be used for testing
+
+# IGNORE IF YOU WANT TO LOOK AT ALL THE COLUMNS OR CHANGE TO FIT RANGE OF COLUMNS USED IN ANAYLSIS
+# trimming df to look at range of variables that will most likly be used for testing
+df2 <- df1[, 1:450] 
 
 #####################################################
 # testing
@@ -48,14 +51,20 @@ filtered_df <- df2 %>%
 
 ##########################################################
 # BARPLOT OF THE NUMBER OF COLLEGES IN EACH STATE
-# look at requency of institutions that are open and those that 
+# look at frequency of institutions that are open and those that 
 # are closed 
 
+library(gridExtra)
+
+
 # MAY NEED TO NORMALIZE THE DATA 
+# obtains the frequency of institutions in each state 
 state_count <- filtered_df %>%
   count('STABBR')
-state_count$zscore <- scale(state_count$freq)
+state_count$zscore <- scale(state_count$freq) # normalizing calculations using z-score
 
+# creates a barplot of all the states and number of intuitions in each 
+# in descending order
 state_count_plot <- state_count %>%
   mutate(STABBR = fct_reorder(STABBR, zscore))%>%
   ggplot(aes(x=STABBR, y = zscore, fill= zscore)) + 
@@ -66,12 +75,14 @@ state_count_plot <- state_count %>%
   ggtitle('Total Institutions')+
   theme_classic()
 
-
+# filtering to only look at institutions that are operational 
 open_instit <- filtered_df%>%
   filter(CURROPER == 1)%>%
   count('STABBR')
-open_instit$zscore <- scale(open_instit$freq)
+open_instit$zscore <- scale(open_instit$freq) # normalizing calculations using z-score
 
+# creates a barplot of all the states and number of operational intuitions in each 
+# in descending order
 open_instit_plot <- open_instit %>%
   mutate(STABBR = fct_reorder(STABBR, zscore))%>%
   ggplot(aes(x=STABBR, y = zscore, fill= zscore)) + 
@@ -82,11 +93,14 @@ open_instit_plot <- open_instit %>%
   ggtitle('Open Institutions')+
   theme_classic()
 
+# filtering to only look at institutions that are non-operational 
 closed_instit <- filtered_df%>%
   filter(CURROPER == 0)%>%
   count('STABBR')
 closed_instit$zscore <- scale(closed_instit$freq)
 
+# creates a barplot of all the states and number of non-operational intuitions in each 
+# in descending order
 closed_instit_plot <- closed_instit %>%
   mutate(STABBR = fct_reorder(STABBR, zscore))%>%
   ggplot(aes(x=STABBR, y = zscore, fill= zscore)) + 
@@ -97,39 +111,80 @@ closed_instit_plot <- closed_instit %>%
   ggtitle('Closed Institutions')+
   theme_classic()
 
-library(gridExtra)
-
+# each plot is in a list of 9. This code formats it back into a form that can be plotted
 state_count_grob<- ggplotGrob(state_count_plot)
 open_instit_grob<- ggplotGrob(open_instit_plot)
 closed_instit_grob<- ggplotGrob(closed_instit_plot)
+
 # Arrange the plots in a single window
 combined_plots <- grid.arrange(state_count_grob, open_instit_grob, closed_instit_grob, nrow = 1)
 
 # Display the combined plots
-print(combined_plots)
+grid.arrange(state_count_grob, open_instit_grob, closed_instit_grob, nrow = 1)
 
-# PCIP11: Percentage of degrees awarded in Computer & Information Sciences and Support Services
-# PCIP14: Percentage of degrees awarded in Engineering.
-# PCIP15: Percentage of degrees awarded in Engineering Technologies & Engineering-Related Fields.
-# PCIP27: Percentage of degrees awarded in Mathematics & Statistics.
-# PCIP41: Percentage of degrees awarded in Science Technologies/Technicians.
+##########################################################
+# CARNEGIE CLASSIFICATION VS HIGHEST DEGREE
 
-# CIP11CERT1  CIP11CERT2  CIP11CERT4  CIP11BACHL
-# CIP11CERT1: Cert. <1 academic yr in Computer & Information Sciences & Support Services.
-# CIP11CERT2: Cert. >1<2 academicyrs in Computer & Information Sciences & Support Services.
-# CIP11ASSOC: Associate degree in Computer And Information Sciences And Support Services.
-# CIP11CERT4: Award >2<4 academic yrs in Computer & Information Sciences & Support Services.
-# CIP11BACHL: Bchlr's deg. in Computer & Information Sciences & Support Services.
+library(RColorBrewer) # used to select certain palette
 
+# description of the numbers in HIGHDEG
+# Highest degree awarded
+# 0 Non-degree-granting
+# 1 Certificate degree
+# 2 Associate degree
+# 3 Bachelor's degree
+# 4 Graduate degree
 
-# CIP14CERT1  CIP14CERT2  CIP14ASSOC  CIP14CERT4  CIP14BACHL
-# same pattern as lines 16-20 but for engineering
+high_deg_awarded <- c('Non-degree', 'Certificate', 
+                      'Associate', 'Bachelor', 
+                      'Graduate')
 
-# CIP15CERT1  CIP15CERT2  CIP15ASSOC  CIP15CERT4  CIP15BACHL
-# same pattern as lines 16-20 but for Engineering Technologies & Engineering-Related Fields.
+# description of the numbers in CCBASIC
 
-# CIP27CERT1  CIP27CERT2  CIP27ASSOC  CIP27CERT4  CIP27BACHL
-# same pattern as lines 16-20 but for Mathematics & Statistics
+# website contains discription of each number
+#https://librarytechnology.org/libraries/carnegie/#:~:text=Level%2015%3A%20Doctoral%20Universities%3A%20Very%20High%20Research%20Activity
+cc_basic_score <- c('Associate: High Transfer-High Traditional', 'Associate: High Transfer-Mixed Traditional/nontraditional',
+                    'Associate: High Transfer-High Nontraditional', 'Associate: Mixed Transfer/Career & Technical-High Traditional',
+                    'Associate: Mixed Transfer/Career & Technical-Mixed Traditional/Nontraditional','Associate: Mixed Transfer/Career & Technical-High Nontraditional',
+                    'Associate: High Career and Technical- High Traditional','Associate: High Career and Technical-Mixed Traditional/Nontraditional',
+                    'Associate: High Career and Technical-High Nontraditional', 'Special Focus 2-Years- Health Professions',
+                    'Special Focus 2-Years: Technical Professions','Special Focus 2-Years: Arts and Design',
+                    'Special Focus 2-Years: Other Fields','Baccalaureate/Associate Colleges: Associate Dominate',
+                    'Doctoral Universities: Very High Research Activity','Doctoral Universities: High Research Activity',
+                    'Doctoral/Professional Universities','Masters Colleges and Universities: Larger Programs',
+                    'Masters Colleges and Universities: Medium Programs', 'Master Colleges and Universities: Small Programs',
+                    'Baccalaureate Colleges: Arts and Science Focus','Baccalaureate Colleges: Diverse Fields','Mixed Baccalaureate/ Associates',
+                    'Special Focus 4-Years: Faith-Related Institutions','Special Focus 4-Years: Medical Schools and Centers',
+                    'Special Focus 4-Years: Other Health Profession Schools','Special Focus 4-Years: Engineering Schools',
+                    'Special Focus 4-Years: Other Related-Technology Related Schools','Special Focus 4-Years: Business and Management Schools',
+                    'Special Focus 4-Years: Arts, Music, and Design School','Special Focus 4-Years: Law Schools',
+                    'Special Focus 4-Years: Other Special Focus Institutions','Tribal Colleges'
+                    
+)
 
-# CIP41CERT1  CIP41CERT2  CIP41ASSOC  CIP41CERT4  CIP41BACHL
-# same pattern as lines 16-20 but for Computer & Information Sciences & Support Services.
+# changing the numerical values of the columns to their categorical counterpart
+# +1 is added to each since the count in the csv starts at 0 while the count in R starts at 1
+
+# I am excluding values that contain -2 from the conversion to categorical cause there 
+# is no association with -2.
+filtered_df$CCBASIC[filtered_df$CCBASIC!= -2] <- cc_basic_score [as.numeric(filtered_df$CCBASIC[filtered_df$CCBASIC!= -2])+1]
+filtered_df$HIGHDEG <- high_deg_awarded[as.numeric(filtered_df$HIGHDEG)+1]
+
+# creating a table of just these two columns
+heatmap_data <- table(filtered_df$CCBASIC, filtered_df$HIGHDEG)
+
+# color palette can be found at here: 
+# https://r-graph-gallery.com/38-rcolorbrewers-palettes.html
+my_color_palette <- colorRampPalette(brewer.pal(10,'RdBu'))(34) # Color palette 
+
+# displaying heatmap between Carnegie classification and the highest degree offered
+heatmap(heatmap_data, 
+        Rowv = NA, # Do not cluster rows 
+        Colv = NA, # Do not cluster columns 
+        col = my_color_palette, 
+        scale = "column", # Scale by column 
+        main = "Carnegie classification vs. Highest degree offered", # title of heatmap
+        cexCol = 0.8) # changing the text size of the degrees offered 
+        
+# ANALYSIS
+# The majority of institutions with a CCBasic Score of -2 are usually non-degree-granting or certificate institutions.
