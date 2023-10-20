@@ -1,6 +1,7 @@
 library(dplyr)
 library(ggplot2)
 library(readr)
+library(ggridges)
 library(ggplotify)
 library(gridExtra)
 library(forcats)
@@ -238,6 +239,7 @@ preddeg_plots <- group_bar_plot(group_plot_filtered_df)
 # Function to create density plots for different demographic variables 
 # within each PREDDEG group and returns a pdf of all the graphs
 density_plots <- function(df) {
+  dem_group <-colnames(df[,5:13]) # getting the column names of the demographics that are listed 
   plots <- lapply(dem_group, function(dem) { # looking at groupings of plots based on demographic index
     ggplot(df, aes(x = as.numeric(.data[[dem]]), y = PREDDEG, fill = PREDDEG)) +
       geom_density_ridges() +
