@@ -9,9 +9,13 @@ library(viridis)
 setwd('/Users/yuhanburgess/Documents/GitHub/DataMungingProject2')
 df <- read_csv("CollegeScorecard_Raw_Data_08032021/MERGED2021_22_PP.csv")
 
+######################################################################################
+# INITIAL FILTERING
+
 df<-df %>%
   mutate_all(~ifelse(. == "NULL", NA, .))
 df2 <- df[, 1:450] 
+
 
 # general filtering of data for anaylsis
 df_filter <- function(df){
@@ -119,11 +123,23 @@ group_bar_filter <- function(df){
   return(unique_combo)
 }
 
+# function filters data set to be used in 
+# density_plot function
+density_plot_filter <- function(df){
+  demograph <- cbind(filtered_df[,291], filtered_df[,293:301])  # retrieving information about student demographic
+  pred_undergrad <- cbind(filtered_df[,15:16], filtered_df[,24])# retrieving principal information about institution
+  
+  # this analysis looks specifically at special focus 4-year institutions and those that are considered baccalaureate
+  bach_stud <- cbind(pred_undergrad,demograph)
+  return(bach_stud)
+}
+
 filtered_df<- df_filter(df2)
 institut_ops <- instit_operations(filtered_df)
 group_plot_filtered_df<-group_bar_filter(filtered_df)
+density_plot_df <- density_plot_filter(filtered_df)
 
-
+######################################################################################
 # creating a barplot that looks at the number of institutions in each state 
 bar_plot <- function(df) {
   titles <- c('Total Institutes', 'Open Institutes', 'Closed Institutes') # main title 
@@ -163,8 +179,9 @@ bar_plot <- function(df) {
 # Call the bar_plot function
 combined_plot <- bar_plot(institut_ops)
 
+######################################################################################
 # creating a grouped bar plot that looks at the frequency of predominate degree 
-# within each state and returns a pdf file that countains a graph of each state
+# within each state and returns a pdf file that contains a graph of each state
 group_bar_plot <- function(df) {
   plots <- lapply(unique(df$STABBR), function(state) {
     
@@ -207,11 +224,107 @@ group_bar_plot <- function(df) {
 # Call the group_bar_plot function
 preddeg_plots <- group_bar_plot(group_plot_filtered_df)
 
+## ANALYSIS 
+# On average, bachelor degrees and certificates are the majority of predominate
+# degrees awarded per state. 
 
+# 1. Most higher education systems are set up for the completion of a Bachelor's degree
 
+# 2. The prominence of certificates could be related to attaining a certain qualification
+# and not necessarily a degree. (A job paying for a certificate from an institution to further
+# a person's competency in the work place?)
 
+######################################################################################
+# Function to create density plots for different demographic variables 
+# within each PREDDEG group and returns a pdf of all the graphs
+density_plots <- function(df) {
+  plots <- lapply(dem_group, function(dem) { # looking at groupings of plots based on demographic index
+    ggplot(df, aes(x = as.numeric(.data[[dem]]), y = PREDDEG, fill = PREDDEG)) +
+      geom_density_ridges() +
+      scale_fill_viridis(discrete = TRUE, 
+                         option = 'viridis', 
+                         direction = -1) +
+      theme_ridges() +
+      scale_x_continuous(limits = c(0, 1)) + # set limits to range of data
+      labs(title = dem) +  # Set the title for the plot
+      theme(legend.position = 'right', # position of legend
+            text = element_text(size = 8)) + # size of words in legend
+      theme(axis.text.y = element_blank(),  # removing any x or y axis labels
+            axis.title.y = element_blank(),
+            axis.text.x = element_blank(), 
+            axis.title.x = element_blank())
+      
+  })
+  
+  # Save each set of density plots to separate PDF files
+  pdf('demographic_plots.pdf')
+  for (i in 1:length(plots)) {
+      print(plots[[i]])
+    }
+  dev.off()
+  
+  return(plots)
+}
 
+# Call the density_plots function
+dem_density_plots <- density_plots(density_plot_df)
 
+## ANALYSIS 
+# Those who identify as white have a more balanced distribution withing all 
+# the categories except graduate. There could be an association between access
+# to higher education and identifying as white.
 
+# There is a lower density of individuals who identity as another race who seek
+# higher education (there is a predominate right skew to all the graphs)
 
+# Lurking variable: population size of each demographic
 
+######################################################################################
+# Function creates a heatmap that visually represents the correlation 
+# between the degree awarded and its Carnegie classification
+heat_map <- function(df){
+  # color palette can be found at here: 
+  # https://r-graph-gallery.com/38-rcolorbrewers-palettes.html
+  my_color_palette <- viridis_pal(alpha = 0.7, 
+                                  direction = 1,
+                                  option = 'viridis')(34)# Color palette, # number = # of colors
+  heatmap_data <- as.matrix(df) # making sure data is in format that will return an image 
+  # displaying heatmap between Carnegie classification and the highest degree offered
+  map <- heatmap(heatmap_data, 
+          Rowv = NA, # Do not cluster rows 
+          Colv = NA, # Do not cluster columns 
+          col = my_color_palette, 
+          scale = "column", # Scale by column 
+          main = "Carnegie classification vs. Degree", # title of heatmap
+          cexCol = 0.8) # changing the text size of the degrees offered 
+
+  return(map)
+}
+
+# df for heatmap
+highest_heatmap_data <- table(filtered_df$CCBASIC, filtered_df$HIGHDEG)
+predominate_heatmap_data <- table(filtered_df$CCBASIC, filtered_df$PREDDEG)
+
+# calls heat_map function
+highestvsCCBASIC <- heat_map(highest_heatmap_data)
+predominatevsCCBASIC <- heat_map(predominate_heatmap_data)
+
+## ANALYSIS
+# general: -2 looks to be referring to institutions that are certificate
+# or non-degree grant. Both also have a similar correlation between CCBASIC
+# scores listed as Associate or Special Focus 2-Years and associate degree
+# awarded. 
+
+# CCBASIC vs HIGHDEG
+# Intuitively, there is a better correlation between the CC classification and
+# highest degree awarded. We can see this in the Graduate column where a majority 
+# of the lighter colors are associated with masters and doctoral programs. We can 
+# see a similar grouping of Special Focus 4-Year institutions and baccalaureate 
+# institutions with the Bachelor degree. (I would expect institutions that say 4-years
+# are working towards a bachelor's degree.)
+
+# CCBASIC vs PREDDEG
+# In this map we can see that Bachelor degree has a higher correlation with 
+# baccalaureate, masters, and doctoral institutions. This could be because
+# individuals are only looking at getting bachelors, but the institution that they
+# go to allows for further studies. 
