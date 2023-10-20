@@ -14,11 +14,8 @@ raw_files <- data.frame(
 # creates a table with the file names and the path associated with it 
 raw_file_paths <- raw_files  %>%
   mutate(filepath = paste0(
-<<<<<<< Updated upstream
-    'CollegeScorecard_Raw_Data_08032021/', filename))
-=======
     'csv_files/', filename))
->>>>>>> Stashed changes
+
 
 # Depending on how many files we want to look at will determine which ones we combine togeth
 # Some of the files do not have the same stricture time for each column (one column could be a double but then
