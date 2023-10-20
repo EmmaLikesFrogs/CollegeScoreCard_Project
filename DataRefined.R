@@ -7,31 +7,48 @@ library(gridExtra)
 library(forcats)
 library(viridis)
 
-setwd('/Users/yuhanburgess/Documents/GitHub/DataMungingProject2')
-df <- read_csv("CollegeScorecard_Raw_Data_08032021/MERGED2021_22_PP.csv")
+# install.packages('visdat')
+library(visdat)
 
+setwd('/Users/yuhanburgess/Documents/GitHub/DataMungingProject2/data')
+df <- read_csv("MERGED2021_22_PP.csv")
 ######################################################################################
 # INITIAL FILTERING
 
-df<-df %>%
-  mutate_all(~ifelse(. == "NULL", NA, .))
-df2 <- df[, 1:450] 
+df_filter <- function(df) {
+  df<-df %>%
+    mutate_all(~ifelse(. == "NULL", NA, .))
+  
+  # vis_miss(df, warn_large_data = FALSE)
+  
+  df_test <- df[1:6049,]
+  vis_miss(df_test, warn_large_data = FALSE)
+  
+  names <-apply(df_test, 2, function(x) sum(!is.na(x))/length(x) > 0.70)
+  df1<- as.data.frame(df)
+  df1<-df1[, c(names)]
+  
+  # vis_miss(df1, warn_large_data = FALSE)
+  
+  return(df1)
+  
+}
+# categorizing columns for analysis
+df_categorical <- function(df){
+  df <- df[, 1:450] 
 
-
-# general filtering of data for anaylsis
-df_filter <- function(df){
   #REMOVING ROWS THAT ARE 90% INCOMPLETE 
   # Calculate the percentage of NA values for each row
-  row_na_percent <- rowSums(is.na(df2)) / ncol(df2) * 100
+  row_na_percent <- rowSums(is.na(df)) / ncol(df) * 100
   # Find rows with 90% or more NA values
   rows_with_90_percent_or_more_na <- which(row_na_percent >= 90)
   
   # MAY REMOVE LATER
-  na_df <- df2 %>%
+  na_df <- df %>%
     filter(row_number() %in% rows_with_90_percent_or_more_na)
   
   # returns df that have rows that are less than 90% incomplete
-  filtered_df <- df2 %>%
+  filtered_df <- df1 %>%
     filter(!(row_number() %in% rows_with_90_percent_or_more_na))
   
   pred_deg_awarded <- c('Not classified', 'Certificate', 
@@ -59,11 +76,13 @@ df_filter <- function(df){
                       'Special Focus 4-Years: Arts, Music, and Design School','Special Focus 4-Years: Law Schools',
                       'Special Focus 4-Years: Other Special Focus Institutions','Tribal Colleges')
        
-  filtered_df$CCBASIC[filtered_df$CCBASIC!= -2] <- cc_basic_score [as.numeric(filtered_df$CCBASIC[filtered_df$CCBASIC!= -2])+1]
-  filtered_df$HIGHDEG <- high_deg_awarded[as.numeric(filtered_df$HIGHDEG)+1]
-  filtered_df$PREDDEG <- pred_deg_awarded[as.numeric(filtered_df$PREDDEG)+1]
+  # changes numeric values to categorical
+  valid_indx <- which (df$CCBASIC != -2) # -2 is not associated to a numeric value (not changing the value)
+  df$CCBASIC[valid_indx] <- cc_basic_score [as.numeric(df$CCBASIC[valid_indx])+1]
+  df$HIGHDEG <- high_deg_awarded[as.numeric(df$HIGHDEG)+1]
+  df$PREDDEG <- pred_deg_awarded[as.numeric(df$PREDDEG)+1]
   
- return(filtered_df) 
+ return(df) 
 }
 
 # function filters out data that does not 
@@ -135,7 +154,9 @@ density_plot_filter <- function(df){
   return(bach_stud)
 }
 
-filtered_df<- df_filter(df2)
+
+df_trimmed<- df_filter(df)
+filtered_df <-df_categorical(df_trimmed)
 institut_ops <- instit_operations(filtered_df)
 group_plot_filtered_df<-group_bar_filter(filtered_df)
 density_plot_df <- density_plot_filter(filtered_df)
