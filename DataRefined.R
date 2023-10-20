@@ -1,34 +1,19 @@
 library(dplyr)
 library(ggplot2)
 library(readr)
-<<<<<<< Updated upstream
 library(ggridges)
-=======
->>>>>>> Stashed changes
+
 library(ggplotify)
 library(gridExtra)
 library(forcats)
 library(viridis)
 
-<<<<<<< Updated upstream
 # install.packages('visdat')
 library(visdat)
 
-setwd('/Users/yuhanburgess/Documents/GitHub/DataMungingProject2/data')
-df <- read_csv("MERGED2021_22_PP.csv")
-=======
-setwd('/Users/yuhanburgess/Documents/GitHub/DataMungingProject2')
-df <- read_csv("CollegeScorecard_Raw_Data_08032021/MERGED2021_22_PP.csv")
-
-<<<<<<< Updated upstream
-df<-df %>%
-  mutate_all(~ifelse(. == "NULL", NA, .))
-df2 <- df[, 1:450] 
-=======
-
 setwd('/Users/yuhanburgess/Documents/GitHub/DataMungingProject2')
 df <- read_csv("csv_files/MERGED2021_22_PP.csv")
->>>>>>> Stashed changes
+
 ######################################################################################
 # INITIAL FILTERING
 
@@ -53,41 +38,18 @@ df_filter <- function(df) {
 # categorizing columns for analysis
 df_categorical <- function(df){
   df <- df[, 1:450] 
-<<<<<<< Updated upstream
-
   #REMOVING ROWS THAT ARE 90% INCOMPLETE 
   # Calculate the percentage of NA values for each row
   row_na_percent <- rowSums(is.na(df)) / ncol(df) * 100
-=======
->>>>>>> Stashed changes
-
-# general filtering of data for anaylsis
-df_filter <- function(df){
-  #REMOVING ROWS THAT ARE 90% INCOMPLETE 
-  # Calculate the percentage of NA values for each row
-  row_na_percent <- rowSums(is.na(df2)) / ncol(df2) * 100
->>>>>>> Stashed changes
   # Find rows with 90% or more NA values
   rows_with_90_percent_or_more_na <- which(row_na_percent >= 90)
   
   # MAY REMOVE LATER
-<<<<<<< Updated upstream
   na_df <- df %>%
     filter(row_number() %in% rows_with_90_percent_or_more_na)
   
   # returns df that have rows that are less than 90% incomplete
-  filtered_df <- df1 %>%
-=======
-  na_df <- df2 %>%
-    filter(row_number() %in% rows_with_90_percent_or_more_na)
-  
-  # returns df that have rows that are less than 90% incomplete
-<<<<<<< Updated upstream
-  filtered_df <- df2 %>%
-=======
   filtered_df <- df %>%
->>>>>>> Stashed changes
->>>>>>> Stashed changes
     filter(!(row_number() %in% rows_with_90_percent_or_more_na))
   
   pred_deg_awarded <- c('Not classified', 'Certificate', 
@@ -115,7 +77,7 @@ df_filter <- function(df){
                       'Special Focus 4-Years: Arts, Music, and Design School','Special Focus 4-Years: Law Schools',
                       'Special Focus 4-Years: Other Special Focus Institutions','Tribal Colleges')
        
-<<<<<<< Updated upstream
+
   # changes numeric values to categorical
   valid_indx <- which (df$CCBASIC != -2) # -2 is not associated to a numeric value (not changing the value)
   df$CCBASIC[valid_indx] <- cc_basic_score [as.numeric(df$CCBASIC[valid_indx])+1]
@@ -123,13 +85,7 @@ df_filter <- function(df){
   df$PREDDEG <- pred_deg_awarded[as.numeric(df$PREDDEG)+1]
   
  return(df) 
-=======
-  filtered_df$CCBASIC[filtered_df$CCBASIC!= -2] <- cc_basic_score [as.numeric(filtered_df$CCBASIC[filtered_df$CCBASIC!= -2])+1]
-  filtered_df$HIGHDEG <- high_deg_awarded[as.numeric(filtered_df$HIGHDEG)+1]
-  filtered_df$PREDDEG <- pred_deg_awarded[as.numeric(filtered_df$PREDDEG)+1]
-  
- return(filtered_df) 
->>>>>>> Stashed changes
+
 }
 
 # function filters out data that does not 
@@ -190,26 +146,11 @@ group_bar_filter <- function(df){
   return(unique_combo)
 }
 
-<<<<<<< Updated upstream
-# function filters data set to be used in 
-# density_plot function
-density_plot_filter <- function(df){
-  demograph <- cbind(filtered_df[,291], filtered_df[,293:301])  # retrieving information about student demographic
-  pred_undergrad <- cbind(filtered_df[,15:16], filtered_df[,24])# retrieving principal information about institution
-=======
-<<<<<<< Updated upstream
-filtered_df<- df_filter(df2)
-institut_ops <- instit_operations(filtered_df)
-group_plot_filtered_df<-group_bar_filter(filtered_df)
-
-
-=======
 # function filters data set to be used in 
 # density_plot function
 ridge_plot_filter <- function(df){
   demograph <-df[,264:273]  # retrieving information about student demographic
   pred_undergrad <- cbind(STABBR = df [,6], df[,14:15], CCBASIC = df[,22])# retrieving principal information about institution
->>>>>>> Stashed changes
   
   # this analysis looks specifically at special focus 4-year institutions and those that are considered baccalaureate
   bach_stud <- cbind(pred_undergrad,demograph)
@@ -221,16 +162,10 @@ df_trimmed<- df_filter(df)
 filtered_df <-df_categorical(df_trimmed)
 institut_ops <- instit_operations(filtered_df)
 group_plot_filtered_df<-group_bar_filter(filtered_df)
-<<<<<<< Updated upstream
-density_plot_df <- density_plot_filter(filtered_df)
-
-######################################################################################
-=======
 ridge_plot_df <- ridge_plot_filter(filtered_df)
 
  ######################################################################################
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
 # creating a barplot that looks at the number of institutions in each state 
 bar_plot <- function(df) {
   titles <- c('Total Institutes', 'Open Institutes', 'Closed Institutes') # main title 
@@ -245,7 +180,6 @@ bar_plot <- function(df) {
     data <- data %>%
       mutate(STABBR = fct_reorder(STABBR, n))
     
-    # 
     ops_plot <- ggplot(data, aes(x = STABBR, y = n, fill = n)) +
       geom_bar(stat = 'identity', # determines how the data should be summarized (height based on value of dataset)
                alpha = 0.7, 
@@ -270,14 +204,9 @@ bar_plot <- function(df) {
 # Call the bar_plot function
 combined_plot <- bar_plot(institut_ops)
 
-<<<<<<< Updated upstream
 ######################################################################################
 # creating a grouped bar plot that looks at the frequency of predominate degree 
 # within each state and returns a pdf file that contains a graph of each state
-=======
-# creating a grouped bar plot that looks at the frequency of predominate degree 
-# within each state and returns a pdf file that countains a graph of each state
->>>>>>> Stashed changes
 group_bar_plot <- function(df) {
   plots <- lapply(unique(df$STABBR), function(state) {
     
@@ -320,33 +249,14 @@ group_bar_plot <- function(df) {
 # Call the group_bar_plot function
 preddeg_plots <- group_bar_plot(group_plot_filtered_df)
 
-<<<<<<< Updated upstream
-## ANALYSIS 
-# On average, bachelor degrees and certificates are the majority of predominate
-# degrees awarded per state. 
-
-# 1. Most higher education systems are set up for the completion of a Bachelor's degree
-
-# 2. The prominence of certificates could be related to attaining a certain qualification
-# and not necessarily a degree. (A job paying for a certificate from an institution to further
-# a person's competency in the work place?)
-
 ######################################################################################
 # Function to create density plots for different demographic variables 
 # within each PREDDEG group and returns a pdf of all the graphs
-density_plots <- function(df) {
-=======
 
-
-
-<<<<<<< Updated upstream
-
-=======
 ######################################################################################
 # Function to create density plots for different demographic variables 
 # within each PREDDEG group and returns a pdf of all the graphs
 ridge_plots <- function(df) {
->>>>>>> Stashed changes
   dem_group <-colnames(df[,5:13]) # getting the column names of the demographics that are listed 
   plots <- lapply(dem_group, function(dem) { # looking at groupings of plots based on demographic index
     ggplot(df, aes(x = as.numeric(.data[[dem]]), y = PREDDEG, fill = PREDDEG)) +
@@ -376,9 +286,8 @@ ridge_plots <- function(df) {
   return(plots)
 }
 
-# Call the density_plots function
-<<<<<<< Updated upstream
-dem_density_plots <- density_plots(density_plot_df)
+# Call the ridge_plots function
+dem_ridge_plots <- ridge_plots(ridge_plot_df)
 
 ## ANALYSIS 
 # Those who identify as white have a more balanced distribution withing all 
@@ -439,11 +348,4 @@ predominatevsCCBASIC <- heat_map(predominate_heatmap_data)
 # baccalaureate, masters, and doctoral institutions. This could be because
 # individuals are only looking at getting bachelors, but the institution that they
 # go to allows for further studies. 
-=======
-dem_ridge_plots <- ridge_plots(ridge_plot_df)
->>>>>>> Stashed changes
 
-
-
-
->>>>>>> Stashed changes
