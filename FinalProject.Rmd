@@ -35,48 +35,59 @@ setwd('/Users/emmahorton/DataScience/DataMunging/DataSets/')
 df <- read_csv("MERGED2021_22_PP.csv")
 ```
 
-Initial Data Filtering \# Code for changing NULL values to NA \# Code
-for removing bottom rows \# Code for removing columns with less than 70%
-completeness \# Code for converting columns to categorical data
 
+# Function for Initial Data Filtering
+
+# 1. Handling NULL Values:
+#    - Replaces all occurrences of "NULL" values with a standardized "NA" representation. This conversion ensures uniformity in missing data representation.
+
+# 2. Removing Bottom Rows:
+#    - The function identifies and removes the bottom rows of the dataset. These rows are typically considered to contain less relevant or critical information for analysis. Eliminating them can improve computational efficiency and focus the analysis on more informative data points.
+
+# 3. Filtering Columns by Completeness:
+#    - Filters out columns that do not meet a specified completeness threshold, which is set at 70% in our implementation. This function helps eliminate variables with significant missing data that could potentially skew analysis results.
+
+# 4. Converting Columns to Categorical Data:
+#    - Finally, the function incorporates the conversion of specific columns into categorical data. This conversion aids in ensuring that the dataset is appropriately formatted making it more suitable for further analysis.
 ```{r}
 df_filter <- function(df) {
-  # changing all NULL values into NA values
-  df<-df %>%
+  # Changing all NULL values into NA values
+  df <- df %>%
     mutate_all(~ifelse(. == "NULL", NA, .))
-
-  # vis_miss(df, warn_large_data = FALSE)
   
-  df_test <- df[1:6049,] # removing bottom rows since they do not contain important info for analysis
-  # vis_miss(df_test, warn_large_data = FALSE) # plotting missing and present data in csv file
+  # Remove bottom rows since they do not contain important info for analysis
+  df_test <- df[1:6049,]
   
-  # remove columns that are not 70% complete
-  names <-apply(df_test, 2, function(x) sum(!is.na(x))/length(x) > 0.70)
-  df<- as.data.frame(df)
-  df<-df[, c(names)]
+  # Identify columns that are at least 70% complete
+  names <- apply(df_test, 2, function(x) sum(!is.na(x)) / length(x) > 0.70)
+  df <- as.data.frame(df)
+  
+  # Keep only the columns that meet the completeness threshold
+  df <- df[, c(names)]
    
-  df <- df_categorical(df) # change three columns from numeric to categorical data
-  
-  # vis_miss(df1, warn_large_data = FALSE)
+  # Convert selected columns to categorical data
+  df <- df_categorical(df)
   
   return(df)
-  
 }
 ```
 
-Categorizing Columns \# categorizing columns Highest degree, Predominant
-degree, and \# Carnegie classification columns
-
+# Function for Categorizing Columns
+# This function categorizes specific columns in the DataFrame into meaningful categories.
+# The columns being categorized are 'Highest degree', 'Predominant degree', and 'Carnegie classification'.
 ```{r}
 df_categorical <- function(df){
+  # Define categories for 'Predominant degree' column
   pred_deg_awarded <- c('Not classified', 'Certificate', 
                         'Associate', 'Bachelor', 
                         'Graduate')
   
+  # Define categories for 'Highest degree' column
   high_deg_awarded <- c('Non-degree', 'Certificate', 
                         'Associate', 'Bachelor', 
                         'Graduate')
   
+  # Define categories for 'Carnegie classification' column
   cc_basic_score <- c('Associate: High Transfer-High Traditional', 'Associate: High Transfer-Mixed Traditional/nontraditional',
                       'Associate: High Transfer-High Nontraditional', 'Associate: Mixed Transfer/Career & Technical-High Traditional',
                       'Associate: Mixed Transfer/Career & Technical-Mixed Traditional/Nontraditional','Associate: Mixed Transfer/Career & Technical-High Nontraditional',
@@ -93,50 +104,65 @@ df_categorical <- function(df){
                       'Special Focus 4-Years: Other Related-Technology Related Schools','Special Focus 4-Years: Business and Management Schools',
                       'Special Focus 4-Years: Arts, Music, and Design School','Special Focus 4-Years: Law Schools',
                       'Special Focus 4-Years: Other Special Focus Institutions','Tribal Colleges')
-  # changes numeric values to categorical
-  valid_indx <- which (df$CCBASIC != -2) # -2 is not associated to a numeric value (not changing the value)
-  df$CCBASIC[valid_indx] <- cc_basic_score [as.numeric(df$CCBASIC[valid_indx])+1]
-  df$HIGHDEG <- high_deg_awarded[as.numeric(df$HIGHDEG)+1]
-  df$PREDDEG <- pred_deg_awarded[as.numeric(df$PREDDEG)+1]
   
+  # Change numeric values to categorical values for specific columns
+  
+  # Identify rows where 'CCBASIC' column is not equal to -2 (numeric values)
+  valid_indx <- which(df$CCBASIC != -2)
+  
+  # For the 'CCBASIC' column, transform numeric values to categorical values
+  # We use 'cc_basic_score' to map the numeric values to corresponding categorical labels.
+  # Adding 1 to the numeric values aligns them with the indices of the category vector.
+  df$CCBASIC[valid_indx] <- cc_basic_score[as.numeric(df$CCBASIC[valid_indx]) + 1]
+  
+  # Similar transformations are applied to 'HIGHDEG' and 'PREDDEG' columns.
+  # Numeric values are mapped to categorical labels using 'high_deg_awarded' and 'pred_deg_awarded' vectors.
+  df$HIGHDEG <- high_deg_awarded[as.numeric(df$HIGHDEG) + 1]
+  df$PREDDEG <- pred_deg_awarded[as.numeric(df$PREDDEG) + 1]
+
   return(df)
 }
-  
-  
 ```
 
-Further Data Trimming
+# Function for Further Data Trimming
 
+# 1. Removing Highly Incomplete Rows:
+#    - Identifies and removes rows that are considered highly incomplete. By eliminating these rows, the dataset becomes more concise and focused on relevant data points.
+
+# 2. Limiting the Number of Columns:
+#    - Restricts the dataset to include only the first 450 columns. This is implemented to reduce computational complexity, speed up the analysis, and narrow the scope of investigation to the most relevant attributes.
 ```{r}
 df_shorten <- function(df){
+  # Keep only the first 450 columns
   df <- df[, 1:450] 
-  #REMOVING ROWS THAT ARE 90% INCOMPLETE 
+  
+  # Remove rows that are 90% or more incomplete
+  
   # Calculate the percentage of NA values for each row
   row_na_percent <- rowSums(is.na(df)) / ncol(df) * 100
+  
   # Find rows with 90% or more NA values
   rows_with_90_percent_or_more_na <- which(row_na_percent >= 90)
   
-  # MAY REMOVE LATER
+  # Create a temporary DataFrame (na_df) containing rows with 90% or more NA values
   na_df <- df %>%
     filter(row_number() %in% rows_with_90_percent_or_more_na)
   
-  # returns df that have rows that are less than 90% incomplete
+  # Create a filtered DataFrame (filtered_df) that excludes rows with 90% or more NA values
   filtered_df <- df %>%
     filter(!(row_number() %in% rows_with_90_percent_or_more_na))
   
-  
- return(filtered_df) 
-
+  # Return the filtered DataFrame
+  return(filtered_df) 
 }
 
 ```
 
-Filtering Data by State \# function filters out data that does not \#
-contain actual states
-
+# Function for Filtering Data by State
+# This function filters the DataFrame to retain only rows associated with actual U.S. states.
 ```{r}
-state_isolation <- function (df){
-  # list of only states 
+state_isolation <- function(df){
+  # List of two-letter state abbreviations for all U.S. states
   states <- c('AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 
               'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 
               'IL', 'IN', 'IA', 'KS', 'KY', 'LA',
@@ -147,152 +173,137 @@ state_isolation <- function (df){
               'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 
               'WI', 'WY')
   
-  # remove any territories of the US that are not considered states 
-  filtered_df <- df%>%
+  # Remove any rows associated with territories or entities that are not considered U.S. states 
+  filtered_df <- df %>%
     filter(STABBR %in% states)
   
+  # Return the filtered DataFrame containing only U.S. state data
   return(filtered_df)
 }
+
 ```
 
-Data Preparation for Bar Plot \# function filters data set to be used in
-\# bar_plot function
+# Following four functions prepare dataset to facilitate future plotting functions. They filter and aggregate data, ensuring that it is well-structured for creating plots and graphs for data visualizations.
 
+# Function for Data Preparation for Bar Plot
+# This function prepares the dataset to be used in the 'bar_plot' function by filtering
+# and aggregating data related to institutions and their operational status at the state level.
 ```{r}
-
 instit_operations <- function(df){
+  # Filter the DataFrame to retain only rows associated with actual U.S. states
   filtered_df <- state_isolation(df)
   
+  # Count the number of institutions in each U.S. state
   state_count <- filtered_df %>%
     count(STABBR)
 
-  open_instit <- filtered_df%>%
-    filter(CURROPER == 1)%>%
+  # Filter and count the number of currently open institutions in each U.S. state
+  open_instit <- filtered_df %>%
+    filter(CURROPER == 1) %>%
     count(STABBR)
 
-  closed_instit <- filtered_df%>%
-    filter(CURROPER == 0)%>%
+  # Filter and count the number of closed institutions in each U.S. state
+  closed_instit <- filtered_df %>%
+    filter(CURROPER == 0) %>%
     count(STABBR)
   
-  # if you want to return more than one thing, you have to return a list 
-  return(list(state_count = state_count, open_instit = open_instit, closed_instit= closed_instit))
+  # Return a list containing the three datasets for use in the 'bar_plot' function
+  return(list(state_count = state_count, open_instit = open_instit, closed_instit = closed_instit))
 }
-
-
 ```
 
-Data Preparation for Grouped Bar Plot \# function filters data set to be
-used in \# group_bar_plot function
-
+# Function for Data Preparation for Grouped Bar Plot
+# This function filters the dataset to be used in the 'group_bar_plot' function by extracting
+# specific columns, counting occurrences based on degree and state, and ensuring that only states are considered.
 ```{r}
-
 group_bar_filter <- function(df){
-  # retrieving two columns 
-  state_class <- filtered_df[c('STABBR', 'PREDDEG')]
+  # Extract two columns 'STABBR' (state abbreviation) and 'PREDDEG' (predominant degree)
+  state_class <- df[c('STABBR', 'PREDDEG')]
 
-  # count occurrences based on the degree and which state it is from
-  unique_combo <- state_class%>%
-    group_by(STABBR, state_class[2])%>%
+  # Count occurrences of unique combinations of 'PREDDEG' and 'STABBR' (state abbreviation)
+  unique_combo <- state_class %>%
+    group_by(STABBR, PREDDEG) %>%
     summarise(UniqueCount = n())
   
-  # check to make sure we are only looking at states
+  # Ensure that only data related to actual U.S. states is considered
   unique_combo <- state_isolation(unique_combo)
   
-  # create a new column of z-scores just in case
-  # never actually used but oh well (just using up memory)
-  unique_combo$zscore <- scale(unique_combo$UniqueCount)[,1] # normalizing calculations using z-score
+  # Calculate and add a new column of z-scores
+  unique_combo$zscore <- scale(unique_combo$UniqueCount)[,1] # Normalizing calculations using z-score
   
   return(unique_combo)
 }
-
 ```
 
-Data Preparation for Ridge Plot \# function filters data set to be used
-in \# ridge_plot function
-
+# Function for Data Preparation for Ridge Plot
+# This function filters the dataset to be used in the 'ridge_plot' function by extracting
+# specific columns related to student demographics and principal institution information.
 ```{r}
 ridge_plot_filter <- function(df){
-  demograph <-df[,264:273]  # retrieving information about student demographic
-  pred_undergrad <- cbind(STABBR = df [,6], df[,14:15], CCBASIC = df[,22])# retrieving principal information about institution
+  # Extract columns related to student demographic information (columns 264 to 273)
+  demograph <- df[, 264:273]
   
-  # this analysis looks specifically at special focus 4-year institutions and those that are considered baccalaureate
-  # when I wrote bach_stud I thought (Bach is a stud)
-  bach_stud <- cbind(pred_undergrad,demograph)
+  # Extract columns related to principal institution information including state, admission rate, completion rate, and Carnegie classification (columns 6, 14, 15, 22)
+  pred_undergrad <- cbind(STABBR = df[, 6], df[, 14:15], CCBASIC = df[, 22])
+  
+  # Combine the demographic and principal institution information into a single DataFrame
+  # This analysis focuses on special focus 4-year institutions and those considered baccalaureate
+  bach_stud <- cbind(pred_undergrad, demograph)
+  
+  # Return the filtered dataset prepared for the 'ridge_plot' function
   return(bach_stud)
 }
-
-
 ```
 
-Data Preparation for Expense vs. Profit Plot \# function filters data
-set to be used in \# exp_vs_profit_plot function
-
+# Function for Data Preparation for Expense vs. Profit Plot
+# This function filters the dataset to be used in the 'exp_vs_profit_plot' function by extracting
+# specific columns related to institution finance, including state, degree information, tuition revenue, and instructional expenses.
 ```{r}
 exp_vs_profit_filter <- function(df, colname){
-  # df that contains (State, predominate degree, highest degree, Carnegie classification, 
-  #tuition revenue, and instructional expenses)
-  finance_df <- cbind(STABBR = df[,6], df[,14:15], CCBASIC = df[,22], df[,275:276])
+  # Create a DataFrame that contains relevant columns (State, Predominant degree, Highest degree, Carnegie classification, Tuition revenue, and Instructional expenses)
+  finance_df <- cbind(STABBR = df[, 6], df[, 14:15], CCBASIC = df[, 22], df[, 275:276])
   
-  # getting the mean of all tuition revenue for each classification within each state
-  tuition_rev_df <- finance_df%>%
-    group_by(STABBR, !!sym(colname))%>% # !!sym() = bang bang operator unquotes the variable name
+  # Calculate the mean of tuition revenue for each classification within each state
+  tuition_rev_df <- finance_df %>%
+    group_by(STABBR, !!sym(colname)) %>%
     summarise(state_tuition_rev_mean = mean(as.numeric(TUITFTE), na.rm = TRUE))
   
-  # getting the mean of all instructional expenses for each classification within each state
-  expense_df <- finance_df%>%
-    group_by(STABBR, !!sym(colname))%>%
+  # Calculate the mean of instructional expenses for each classification within each state
+  expense_df <- finance_df %>%
+    group_by(STABBR, !!sym(colname)) %>%
     summarise(state_expense_mean = mean(as.numeric(INEXPFTE), na.rm = TRUE))
   
-  # merging the information into one df
-  exp_vs_profit_df  <- cbind(tuition_rev_df, expense_df[,3])
+  # Merge the information into one DataFrame
+  exp_vs_profit_df  <- cbind(tuition_rev_df, expense_df[, 3])
   
-  # finding the difference between the revenue and expenses
-  exp_vs_profit_df <- exp_vs_profit_df%>%
-    mutate(difference = state_tuition_rev_mean- state_expense_mean)
+  # Calculate the difference between revenue and expenses
+  exp_vs_profit_df <- exp_vs_profit_df %>%
+    mutate(difference = state_tuition_rev_mean - state_expense_mean)
+  
+  # Return the filtered dataset prepared for the 'exp_vs_profit_plot' function
   return(exp_vs_profit_df)
 }
 ```
 
-Data Filtering and Operations (Current Error)
-
+# Data Filtering and Operations
 ```{r}
-df_trimmed<- df_filter(df)
-filtered_df <-df_shorten(df_trimmed)
+# Applying the 'df_filter' function to filter the DataFrame and store the result in 'df_trimmed'
+df_trimmed <- df_filter(df)
+
+# Applying the 'df_shorten' function to further filter 'df_trimmed' and store the result in 'filtered_df'
+filtered_df <- df_shorten(df_trimmed)
+
+# Applying the 'instit_operations' function to 'filtered_df' and store the results in 'institut_ops'
 institut_ops <- instit_operations(filtered_df)
-group_plot_filtered_df<-group_bar_filter(filtered_df)
+
+# Applying the 'group_bar_filter' function to 'filtered_df' and store the results in 'group_plot_filtered_df'
+group_plot_filtered_df <- group_bar_filter(filtered_df)
+
+# Applying the 'ridge_plot_filter' function to 'filtered_df' and store the results in 'ridge_plot_df'
 ridge_plot_df <- ridge_plot_filter(filtered_df)
 ```
 
-Grouped Bar Plot for Finance Data (Current Comment Out)
-
-```{r}
-######################################################################################
-# grouped_bar plot of instructional expenditure per full-time student (INEXPFTE)and net tuition 
-# revenue per full-time student (TUITFTE)
-graphics.off() 
-
-
-# finance_plot <- function(df){
-#   plot <- ggplot(df, aes(x = STABBR, group = PREDDEG))+
-#     geom_bar(aes(y = state_tuition_rev_mean, fill = 'tuition revenue'), stat = 'identity', position = 'dodge' , width = 0.5)+
-#     geom_bar(aes(y = state_expense_mean, fill = 'instructional expense'), stat ='identity', position = 'dodge', width = 0.4)+
-#     scale_fill_manual(values = c('tuition revenue' = 'blue', 'instructional expense' = 'darkorange'))+
-#   labs(
-#       title = 'Mean Tuition Revenue vs Mean Instruct. Expense Per Full-Time Equivalent Student',
-#       x = 'State',
-#       y = 'Mean Value',
-#       fill = 'Category'
-#     )+
-#     theme(axis.title.x = element_text(size = 6, angle = 90))+
-#     theme_classic()
-#   print(plot)
-#   return(plot)
-# }
-
-```
-
 Z-Score Finance Plot Function
-
 ```{r}
 z_finance_plot <- function(df, fill, colname){
   plot <- ggplot(df, aes(x = STABBR, group = !!sym(colname)))+
