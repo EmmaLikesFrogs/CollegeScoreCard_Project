@@ -2,7 +2,9 @@
 title: "DataMungingProject"
 author: "Emma Horton, Jin Burgess, Hanna Butsko"
 date: "`r Sys.Date()`"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -23,7 +25,7 @@ library(visdat)
 ```
 Set Working Directory and Read Data
 ```{r}
-setwd('/Users/emmahorton/Documents/GitHub/DataMungingProject2/data/')
+setwd('/Users/emmahorton/DataScience/DataMunging/DataSets/')
 df <- read_csv("MERGED2021_22_PP.csv")
 ```
 Initial Data Filtering
@@ -322,14 +324,13 @@ df_trimmed <- df_trimmed%>%
 df_trimmed <- state_isolation(df_trimmed)
 ```
 
-Creating Z-Score Finance Plot for Predominant Degree
+Creating Z-Score Finance Plot for Predominant Degree (ERROR)
 # getting difference based on grouping of preddeg
 ```{r}
-preddeg_exp_vs_profit_df <- exp_vs_profit_filter(df_trimmed, 'PREDDEG')
-preddeg_exp_vs_profit_df$zscore <- scale(preddeg_exp_vs_profit_df$difference)[,1] # normalizing calculations using z-score
-
-preddeg_exp_vs_profit_plot <- z_finance_plot(preddeg_exp_vs_profit_df, 'PREDDEG', 'zscore')
-preddeg_exp_vs_profit_subplot <- z_finance_subplot(preddeg_exp_vs_profit_df, 'PREDDEG', 'zscore', 'z_pred_finance_plots.pdf')
+#preddeg_exp_vs_profit_df <- exp_vs_profit_filter(df_trimmed, 'PREDDEG')
+#preddeg_exp_vs_profit_df$zscore <- scale(preddeg_exp_vs_profit_df$difference)[,1] # normalizing calculations using z-score
+#preddeg_exp_vs_profit_plot <- z_finance_plot(preddeg_exp_vs_profit_df, 'PREDDEG', 'zscore')
+#preddeg_exp_vs_profit_subplot <- z_finance_subplot(preddeg_exp_vs_profit_df, 'PREDDEG', 'zscore', 'z_pred_finance_plots.pdf')
 ```
 
 Creating Z-Score Finance Plot for Highest Degree (Currently Commented Out)
@@ -342,12 +343,12 @@ highdeg_exp_vs_profit_plot <- z_finance_plot(highdeg_exp_vs_profit_df, 'HIGHDEG'
 # highdeg_exp_vs_profit_subplot <- z_finance_subplot(highdeg_exp_vs_profit_df, 'HIGHDEG', 'zscore', 'z_high_finance_plots.pdf')
 ```
 
-Creating Z-Score Finance Plot for Carnegie Classification (There's some sort of error here on 351
+Creating Z-Score Finance Plot for Carnegie Classification (There's some sort of error here on 351)
 # getting difference based on grouping of CCBASIC
 ```{r}
-ccbasic_exp_vs_profit_df <- exp_vs_profit_filter(df_trimmed, 'CCBASIC')
-ccbasic_exp_vs_profit_df$zscore <- scale(ccbasic_exp_vs_profit_df$difference)[,1] # normalizing calculations using z-score
-ccbasic_exp_vs_profit_subplot <- z_finance_subplot(ccbasic_exp_vs_profit_df, 'CCBASIC', 'zscore', 'z_ccbasic_finance_plots.pdf')
+#ccbasic_exp_vs_profit_df <- exp_vs_profit_filter(df_trimmed, 'CCBASIC')
+#ccbasic_exp_vs_profit_df$zscore <- scale(ccbasic_exp_vs_profit_df$difference)[,1] # normalizing calculations using z-score
+#ccbasic_exp_vs_profit_subplot <- z_finance_subplot(ccbasic_exp_vs_profit_df, 'CCBASIC', 'zscore', 'z_ccbasic_finance_plots.pdf')
 ```
 
 ## ANALYSIS
