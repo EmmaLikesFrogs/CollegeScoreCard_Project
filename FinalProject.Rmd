@@ -408,47 +408,62 @@ ccbasic_exp_vs_profit_df$zscore <- scale(ccbasic_exp_vs_profit_df$difference)[,1
 
 # may mean the institution get more federal money from their enrollment.
 
-Bar Plot for Total, Open, and Closed Institutions \# creating a barplot
-that looks at the number of institutions in each state
 
+
+# Bar Plot for Total, Open, and Closed Institutions
 ```{r}
-bar_plot <- function(df) {
-  titles <- c('Total Institutes', 'Open Institutes', 'Closed Institutes') # main title 
-  ops_plots <- list() # list of 3 different graphs 
+# Initialization: Define titles and an empty list to store individual plots.
+titles <- c('Total Institutes', 'Open Institutes', 'Closed Institutes') # Main title for each plot
+ops_plots <- list() # List to store individual plots
+
+# Loop through the data frames for total, open, and closed institutions.
+for (ops in 1:length(df)) {
+  data <- df[[ops]] # Get the data frame for the current category
+  title <- titles[ops] # Retrieve the associated title for the plot
   
-  # looking thorough total, open, and closed institution's df
-  for (ops in 1:length(df)) {
-    data <- df[[ops]] # getting index from list
-    title <- titles[ops] # retrieving associated title
+  # Order the bars in descending order based on the number of institutions in each state.
+  data <- data %>%
+    mutate(STABBR = fct_reorder(STABBR, n))
+  
+  # Create the bar plot for the current category.
+  ops_plot <- ggplot(data, aes(x = STABBR, y = n, fill = n)) +
+    geom_bar(stat = 'identity', # Determine how the data should be summarized (height based on value of dataset)
+             alpha = 0.7, 
+             width = 0.5) +
+    coord_flip() +
+    scale_fill_viridis(discrete = FALSE, # Use a continuous coloring system
+                       option = 'viridis', # Color palette to be used
+                       direction = -1) + # Gradient direction
+    xlab('') +
+    ggtitle(title) +
+    theme_classic() # Apply a classic theme to the plot
     
-    # order the bars in descending order
-    data <- data %>%
-      mutate(STABBR = fct_reorder(STABBR, n))
-    
-    ops_plot <- ggplot(data, aes(x = STABBR, y = n, fill = n)) +
-      geom_bar(stat = 'identity', # determines how the data should be summarized (height based on value of dataset)
-               alpha = 0.7, 
-               width = 0.5) +
-      coord_flip() +
-      scale_fill_viridis(discrete = FALSE, # coloring system is continuous 
-                         option = 'viridis', # color palette used
-                         direction = -1)+ # direction refers to the gradient direction
-      xlab('') +
-      ggtitle(title) +
-      theme_classic() # background color of window
-    
-    ops_plots[[ops]] <- ops_plot # adding plot to a list 
-  }
-  # Combine the plots into one
-  combined_plots <- grid.arrange(grobs = ops_plots, ncol = length(ops_plots))
-  # Return the combined plot
-  return(combined_plots)
+  ops_plots[[ops]] <- ops_plot # Add the current plot to the list of plots
 }
 
-# Call the bar_plot function
-combined_plot <- bar_plot(institut_ops)
-  
+# Combine the individual plots into one plot grid.
+combined_plots <- grid.arrange(grobs = ops_plots, ncol = length(ops_plots))
+
+# Return the combined plot.
+return(combined_plots)
 ```
+
+# ANALYSIS: Bar Plot for Total, Open, and Closed Institutions
+
+# The purpose of this analysis is to visualize the number of educational institutions in each U.S. state, categorized into three separate plots: one for total institutions, one for open institutions, and one for closed institutions. These plots offer insights into the distribution of institutions across states and highlight significant trends.
+
+# Key Observations:
+# 1. California Dominance: It's immediately evident that the state of California consistently ranks at the top in all three plots, indicating the highest number of total, open, and closed institutions compared to other states. This dominance is likely due to California's substantial population and its attractiveness as a destination for education, drawing students from across the United States and around the world. Several other factors contributing to this dominance could also include: economic factors, cultural and social factors, educational policies, geographical factors, education quality and more.
+
+# 2. New York, Texas, and Florida: Following California, New York secures the second spot in terms of total and open institutions. This can be attributed to the high population density and the presence of numerous prestigious universities and colleges. Texas and Florida closely follow, mirroring similar population-driven demand for educational institutions.
+
+# 3. Population and Demand: The observed trends are strongly correlated with population size and migration patterns. States with larger populations naturally exhibit a higher demand for educational opportunities, leading to a greater number of institutions. Conversely, at the bottom of the graph, states like Alaska and Wyoming have the fewest total and open institutions, in line with their lower populations. In areas with lower populations, the demand for educational institutions is notably lower.
+
+# 4. California's Closed Institutions: An interesting observation is that in addition to having the highest number of open institutions, California also leads in the number of closed institutions. This phenomenon can be attributed to various factors, including intense competition, economic factors, educational innovations, and more. Importantly, this observation is not necessarily a negative reflection on California's educational system. Given California's size, population, and the sheer volume of institutions, it's expected that the number of closed institutions would also be higher compared to other states.
+
+# Conclusion:
+Understanding these patterns is valuable for parents when choosing schools for their children because it provides insights into the educational landscape of different states. These insights help make informed decisions about educational opportunities and policies.
+
 
 Grouped Bar Plot for Predominant Degree \# creating a bar plot that
 looks at the frequency of predominate degree \# within each state and
