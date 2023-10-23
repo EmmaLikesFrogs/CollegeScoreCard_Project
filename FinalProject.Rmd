@@ -14,7 +14,29 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Libraries
+# About
+
+Our project aims to conduct a survey of the U.S. education system for the academic year 2021-2022. The goal is to provide transparency and empower students and families to make informed decisions about college choices. This project focuses on analyzing educational institution data, including factors like the number of institutions, predominant degree, demographic variables, Carnegie classification, and financial aspects.
+
+
+# Data Source
+
+The data is sourced from the College Scorecard Project initiated by the U.S. Department of Education.
+
+
+# Content
+
+1. **Data Preprocessing:**
+   - Data preprocessing involves wrangling the data to filter and clean it for more precise analysis.
+
+2. **Data Visualization:**
+   - We will use bar plots, grouped bar plots, ridge plots, and heatmaps to visualize the data for better understanding.
+
+3. **Analysis and Interpretation:**
+   - We will provide analysis and interpretations for each visualization, discussing patterns, trends, and potential factors influencing the data.
+
+
+# Libraries
 
 ```{r}
 library(dplyr)
@@ -28,8 +50,7 @@ library(viridis)
 library(visdat)
 ```
 
-Set Working Directory and Read Data
-
+# Set Working Directory and Read Data
 ```{r}
 setwd('/Users/emmahorton/DataScience/DataMunging/DataSets/')
 df <- read_csv("MERGED2021_22_PP.csv")
@@ -38,23 +59,17 @@ df <- read_csv("MERGED2021_22_PP.csv")
 
 # Function for Initial Data Filtering
 
-# 1. Handling NULL Values:
-#    - Replaces all occurrences of "NULL" values with a standardized "NA" representation. This conversion ensures
-# uniformity in missing data representation.
+1. **Handling NULL Values:**
+   - Replaces all occurrences of "NULL" values with a standardized "NA" representation. This conversion ensures uniformity in missing data representation.
 
-# 2. Removing Bottom Rows:
-#    - The function identifies and removes the bottom rows of the dataset. These rows are typically considered to
-# contain less relevant or critical information for analysis. Eliminating them can improve computational efficiency
-# and focus the analysis on more informative data points.
+2. **Removing Bottom Rows:**
+   - The function identifies and removes the bottom rows of the dataset. These rows are typically considered to contain less relevant or critical information for analysis. Eliminating them can improve computational efficiency and focus the analysis on more informative data points.
 
-# 3. Filtering Columns by Completeness:
-#    - Filters out columns that do not meet a specified completeness threshold, which is set at 70% in our
-# implementation. This function helps eliminate variables with significant missing data that could potentially skew
-# analysis results.
+3. **Filtering Columns by Completeness:**
+   - Filters out columns that do not meet a specified completeness threshold, which is set at 70% in our implementation. This function helps eliminate variables with significant missing data that could potentially skew analysis results.
 
-# 4. Converting Columns to Categorical Data:
-#    - Finally, the function incorporates the conversion of specific columns into categorical data. This conversion
-# aids in ensuring that the dataset is appropriately formatted making it more suitable for further analysis.
+4. **Converting Columns to Categorical Data:**
+   - Finally, the function incorporates the conversion of specific columns into categorical data. This conversion aids in ensuring that the dataset is appropriately formatted making it more suitable for further analysis.
 ```{r}
 df_filter <- function(df) {
   # Changing all NULL values into NA values
@@ -79,8 +94,8 @@ df_filter <- function(df) {
 ```
 
 # Function for Categorizing Columns
-# This function categorizes specific columns in the DataFrame into meaningful categories.
-# The columns being categorized are 'Highest degree', 'Predominant degree', and 'Carnegie classification'.
+This function categorizes specific columns in the DataFrame into meaningful categories.
+The columns being categorized are 'Highest degree', 'Predominant degree', and 'Carnegie classification'.
 ```{r}
 df_categorical <- function(df){
   # Define categories for 'Predominant degree' column
@@ -132,13 +147,11 @@ df_categorical <- function(df){
 
 # Function for Further Data Trimming
 
-# 1. Removing Highly Incomplete Rows:
-#    - Identifies and removes rows that are considered highly incomplete. By eliminating these rows, the dataset
-# becomes more concise and focused on relevant data points.
+1. **Removing Highly Incomplete Rows:**
+   - Identifies and removes rows that are considered highly incomplete. By eliminating these rows, the dataset becomes more concise and focused on relevant data points.
 
-# 2. Limiting the Number of Columns:
-#    - Restricts the dataset to include only the first 450 columns. This is implemented to reduce computational
-# complexity, speed up the analysis, and narrow the scope of investigation to the most relevant attributes.
+2. **Limiting the Number of Columns:**
+   - Restricts the dataset to include only the first 450 columns. This is implemented to reduce computational complexity, speed up the analysis, and narrow the scope of investigation to the most relevant attributes.
 ```{r}
 df_shorten <- function(df){
   # Keep only the first 450 columns
@@ -167,7 +180,7 @@ df_shorten <- function(df){
 ```
 
 # Function for Filtering Data by State
-# This function filters the DataFrame to retain only rows associated with actual U.S. states.
+This function filters the DataFrame to retain only rows associated with actual U.S. states.
 ```{r}
 state_isolation <- function(df){
   # List of two-letter state abbreviations for all U.S. states
@@ -191,12 +204,11 @@ state_isolation <- function(df){
 
 ```
 
-# Following four functions prepare dataset to facilitate future plotting functions. They filter and aggregate data,
-# ensuring that it is well-structured for creating plots and graphs for data visualizations.
+Following four functions prepare dataset to facilitate future plotting functions. 
+They filter and aggregate data, ensuring that it is well-structured for creating plots and graphs for data visualizations.
 
 # Function for Data Preparation for Bar Plot
-# This function prepares the dataset to be used in the 'bar_plot' function by filtering
-# and aggregating data related to institutions and their operational status at the state level.
+This function prepares the dataset to be used in the 'bar_plot' function by filtering and aggregating data related to institutions and their operational status at the state level.
 ```{r}
 instit_operations <- function(df){
   # Filter the DataFrame to retain only rows associated with actual U.S. states
@@ -222,8 +234,7 @@ instit_operations <- function(df){
 ```
 
 # Function for Data Preparation for Grouped Bar Plot
-# This function filters the dataset to be used in the 'group_bar_plot' function by extracting
-# specific columns, counting occurrences based on degree and state, and ensuring that only states are considered.
+This function filters the dataset to be used in the 'group_bar_plot' function by extracting specific columns, counting occurrences based on degree and state, and ensuring that only states are considered.
 ```{r}
 group_bar_filter <- function(df){
   # Extract two columns 'STABBR' (state abbreviation) and 'PREDDEG' (predominant degree)
@@ -245,8 +256,7 @@ group_bar_filter <- function(df){
 ```
 
 # Function for Data Preparation for Ridge Plot
-# This function filters the dataset to be used in the 'ridge_plot' function by extracting
-# specific columns related to student demographics and principal institution information.
+This function filters the dataset to be used in the 'ridge_plot' function by extracting specific columns related to student demographics and principal institution information.
 ```{r}
 ridge_plot_filter <- function(df){
   # Extract columns related to student demographic information (columns 264 to 273)
@@ -265,9 +275,7 @@ ridge_plot_filter <- function(df){
 ```
 
 # Function for Data Preparation for Expense vs. Profit Plot
-# This function filters the dataset to be used in the 'exp_vs_profit_plot' function by extracting
-# specific columns related to institution finance, including state, degree information, tuition revenue, and
-# instructional expenses.
+This function filters the dataset to be used in the 'exp_vs_profit_plot' function by extracting specific columns related to institution finance, including state, degree information, tuition revenue, and instructional expenses.
 ```{r}
 exp_vs_profit_filter <- function(df, colname){
   # Create a DataFrame that contains relevant columns (State, Predominant degree, Highest degree, Carnegie classification, Tuition revenue, and Instructional expenses)
@@ -313,7 +321,7 @@ group_plot_filtered_df <- group_bar_filter(filtered_df)
 ridge_plot_df <- ridge_plot_filter(filtered_df)
 ```
 
-Z-Score Finance Plot Function
+# Z-Score Finance Plot Function
 ```{r}
 z_finance_plot <- function(df, fill, colname){
   plot <- ggplot(df, aes(x = STABBR, group = !!sym(colname)))+
@@ -339,7 +347,7 @@ z_finance_plot <- function(df, fill, colname){
 }
 ```
 
-Filter Data for Open Institutions
+# Filter Data for Open Institutions
 
 ```{r}
 df_trimmed <- df_trimmed%>%
@@ -477,40 +485,19 @@ combined_plot <- bar_plot(institut_ops)
 
 # ANALYSIS: Bar Plot for Total, Open, and Closed Institutions
 
-# The purpose of this analysis is to visualize the number of educational institutions in each U.S. state, categorized
-# into three separate plots: one for total institutions, one for open institutions, and one for closed institutions.
-# These plots offer insights into the distribution of institutions across states and highlight significant trends.
+The purpose of this analysis is to visualize the number of educational institutions in each U.S. state, categorized into three separate plots: one for total institutions, one for open institutions, and one for closed institutions. These plots offer insights into the distribution of institutions across states and highlight significant trends.
 
 # Key Observations:
-# 1. California Dominance: It's immediately evident that the state of California consistently ranks at the top in all
-# three plots, indicating the highest number of total, open, and closed institutions compared to other states. This
-# dominance is likely due to California's substantial population and its attractiveness as a destination for
-# education, drawing students from across the United States and around the world. Several other factors contributing
-# to this dominance could also include: economic factors, cultural and social factors, educational policies,
-# geographical factors, education quality and more.
+1. **California Dominance:** It's immediately evident that the state of California consistently ranks at the top in all three plots, indicating the highest number of total, open, and closed institutions compared to other states. This dominance is likely due to California's substantial population and its attractiveness as a destination for education, drawing students from across the United States and around the world. Several other factors contributing to this dominance could also include: economic factors, cultural and social factors, educational policies, geographical factors, education quality and more.
 
-# 2. New York, Texas, and Florida: Following California, New York secures the second spot in terms of total and open
-# institutions. This can be attributed to the high population density and the presence of numerous prestigious
-# universities and colleges. Texas and Florida closely follow, mirroring similar population-driven demand for
-# educational institutions.
+2. **New York, Texas, and Florida:** Following California, New York secures the second spot in terms of total and open institutions. This can be attributed to the high population density and the presence of numerous prestigious universities and colleges. Texas and Florida closely follow, mirroring similar population-driven demand for educational institutions.
 
-# 3. Population and Demand: The observed trends are strongly correlated with population size and migration patterns.
-# States with larger populations naturally exhibit a higher demand for educational opportunities, leading to a greater
-# number of institutions. Conversely, at the bottom of the graph, states like Alaska and Wyoming have the fewest total
-# and open institutions, in line with their lower populations. In areas with lower populations, the demand for
-# educational institutions is notably lower.
+3. **Population and Demand:** The observed trends are strongly correlated with population size and migration patterns. States with larger populations naturally exhibit a higher demand for educational opportunities, leading to a greater number of institutions. Conversely, at the bottom of the graph, states like Alaska and Wyoming have the fewest total and open institutions, in line with their lower populations. In areas with lower populations, the demand for educational institutions is notably lower.
 
-# 4. California's Closed Institutions: An interesting observation is that in addition to having the highest number of
-# open institutions, California also leads in the number of closed institutions. This phenomenon can be attributed to
-# various factors, including intense competition, economic factors, educational innovations, and more. Importantly,
-# this observation is not necessarily a negative reflection on California's educational system. Given California's
-# size, population, and the sheer volume of institutions, it's expected that the number of closed institutions would
-# also be higher compared to other states.
+4. **California's Closed Institutions:** An interesting observation is that in addition to having the highest number of open institutions, California also leads in the number of closed institutions. This phenomenon can be attributed to various factors, including intense competition, economic factors, educational innovations, and more. Importantly, this observation is not necessarily a negative reflection on California's educational system. Given California's size, population, and the sheer volume of institutions, it's expected that the number of closed institutions would also be higher compared to other states.
 
 # Conclusion:
-# Understanding these patterns is valuable for parents when choosing schools for their children because it provides
-# insights into the educational landscape of different states. These insights help make informed decisions about
-# educational opportunities and policies.
+Understanding these patterns is valuable for parents when choosing schools for their children because it provides insights into the educational landscape of different states. These insights help make informed decisions about educational opportunities and policies.
 
 
 Grouped Bar Plot for Predominant Degree \# creating a bar plot that
