@@ -14,29 +14,30 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# About
+About
 
 Our project aims to conduct a survey of the U.S. education system for the academic year 2021-2022. The goal is to provide transparency and empower students and families to make informed decisions about college choices. This project focuses on analyzing educational institution data, including factors like the number of institutions, predominant degree, demographic variables, Carnegie classification, and financial aspects.
 
 
-# Data Source
+Data Source
 
 The data is sourced from the College Scorecard Project initiated by the U.S. Department of Education.
 
-
-# Content
+Content
 
 1. **Data Preprocessing:**
+
    - Data preprocessing involves wrangling the data to filter and clean it for more precise analysis.
 
 2. **Data Visualization:**
    - We will use bar plots, grouped bar plots, ridge plots, and heatmaps to visualize the data for better understanding.
 
 3. **Analysis and Interpretation:**
+
    - We will provide analysis and interpretations for each visualization, discussing patterns, trends, and potential factors influencing the data.
 
 
-# Libraries
+Libraries
 
 ```{r}
 library(dplyr)
@@ -50,26 +51,34 @@ library(viridis)
 library(visdat)
 ```
 
-# Set Working Directory and Read Data
+Set Working Directory and Read Data
+
 ```{r}
-setwd('/Users/emmahorton/DataScience/DataMunging/DataSets/')
-df <- read_csv("MERGED2021_22_PP.csv")
+setwd('/Users/yuhanburgess/Documents/GitHub/DataMungingProject2')
+df <- read_csv('csv_files/MERGED2021_22_PP.csv')
+df<-df %>%
+    mutate_all(~ifelse(. == "NULL", NA, .))
+  
+vis_miss(df, warn_large_data = FALSE)
 ```
-
-
-# Function for Initial Data Filtering
+Function for Initial Data Filtering
 
 1. **Handling NULL Values:**
+
    - Replaces all occurrences of "NULL" values with a standardized "NA" representation. This conversion ensures uniformity in missing data representation.
 
 2. **Removing Bottom Rows:**
+
    - The function identifies and removes the bottom rows of the dataset. These rows are typically considered to contain less relevant or critical information for analysis. Eliminating them can improve computational efficiency and focus the analysis on more informative data points.
 
 3. **Filtering Columns by Completeness:**
+
    - Filters out columns that do not meet a specified completeness threshold, which is set at 70% in our implementation. This function helps eliminate variables with significant missing data that could potentially skew analysis results.
 
-4. **Converting Columns to Categorical Data:**
+ 4. **Converting Columns to Categorical Data:**
+ 
    - Finally, the function incorporates the conversion of specific columns into categorical data. This conversion aids in ensuring that the dataset is appropriately formatted making it more suitable for further analysis.
+   
 ```{r}
 df_filter <- function(df) {
   # Changing all NULL values into NA values
@@ -93,9 +102,12 @@ df_filter <- function(df) {
 }
 ```
 
-# Function for Categorizing Columns
+Function for Categorizing Columns
+
 This function categorizes specific columns in the DataFrame into meaningful categories.
+
 The columns being categorized are 'Highest degree', 'Predominant degree', and 'Carnegie classification'.
+
 ```{r}
 df_categorical <- function(df){
   # Define categories for 'Predominant degree' column
@@ -109,22 +121,24 @@ df_categorical <- function(df){
                         'Graduate')
   
   # Define categories for 'Carnegie classification' column
-  cc_basic_score <- c('Associate: High Transfer-High Traditional', 'Associate: High Transfer-Mixed Traditional/nontraditional',
-                      'Associate: High Transfer-High Nontraditional', 'Associate: Mixed Transfer/Career & Technical-High Traditional',
-                      'Associate: Mixed Transfer/Career & Technical-Mixed Traditional/Nontraditional','Associate: Mixed Transfer/Career & Technical-High Nontraditional',
-                      'Associate: High Career and Technical- High Traditional','Associate: High Career and Technical-Mixed Traditional/Nontraditional',
-                      'Associate: High Career and Technical-High Nontraditional', 'Special Focus 2-Years- Health Professions',
-                      'Special Focus 2-Years: Technical Professions','Special Focus 2-Years: Arts and Design',
-                      'Special Focus 2-Years: Other Fields','Baccalaureate/Associate Colleges: Associate Dominate',
-                      'Doctoral Universities: Very High Research Activity','Doctoral Universities: High Research Activity',
-                      'Doctoral/Professional Universities','Masters Colleges and Universities: Larger Programs',
-                      'Masters Colleges and Universities: Medium Programs', 'Master Colleges and Universities: Small Programs',
-                      'Baccalaureate Colleges: Arts and Science Focus','Baccalaureate Colleges: Diverse Fields','Mixed Baccalaureate/ Associates',
-                      'Special Focus 4-Years: Faith-Related Institutions','Special Focus 4-Years: Medical Schools and Centers',
-                      'Special Focus 4-Years: Other Health Profession Schools','Special Focus 4-Years: Engineering Schools',
-                      'Special Focus 4-Years: Other Related-Technology Related Schools','Special Focus 4-Years: Business and Management Schools',
-                      'Special Focus 4-Years: Arts, Music, and Design School','Special Focus 4-Years: Law Schools',
-                      'Special Focus 4-Years: Other Special Focus Institutions','Tribal Colleges')
+  cc_basic_score <- c('Assoc.: High Transfer-High Traditional', 'Assoc.: High Transfer-Mixed Traditional/nontraditional',
+                      'Assoc.: High Transfer-High Nontraditional', 'Assoc.: Mixed Transfer/Career & Technical-High Traditional',
+                      'Assoc.: Mixed Transfer/Career & Technical-Mixed Traditional/Nontraditional','Assoc.: Mixed Transfer/Career & Technical-High Nontraditional',
+                      'Assoc.: High Career and Technical- High Traditional','Assoc.: High Career and Technical-Mixed Traditional/Nontraditional',
+                      'Assoc.: High Career and Technical-High Nontraditional', 'SF 2-Yrs- Health Professions',
+                      'SF 2-Yrs: Technical Professions','SF 2-Yrs: Arts and Design',
+                      'SF 2-Yrs: Other Fields','Bacc./Assoc. Colleges: Assoc. Dominate',
+                      'PhD UNI: Very High Research Activity','PhD UNI: High Research Activity',
+                      'Doctoral/Professional UNI','Masters Colleges and UNI: Larger Programs',
+                      'Masters Colleges and UNI: Medium Programs', 'Master Colleges and UNI: Small Programs',
+                      'Bacc. Colleges: Arts and Science Focus','Bacc. Colleges: Diverse Fields','Mixed Bacc./ Assoc.',
+                      'SF 4-Yrs: Faith-Related Institutions','SF 4-Years: Medical Schools and Centers',
+                      'SF 4-Yrs: Other Health Profession Schools','SF 4-Yrs: Engineering Schools',
+                      'SF 4-Yrs: Other Related-Technology Related Schools','SF 4-Yrs: Business and Management Schools',
+                      'SF 4-Yrs: Arts, Music, and Design School','SF4-Yrs: Law Schools',
+                      'SF 4-Yrs: Other SF Institutions','Tribal Colleges')
+  
+  
   
   # Change numeric values to categorical values for specific columns
   
@@ -145,13 +159,16 @@ df_categorical <- function(df){
 }
 ```
 
-# Function for Further Data Trimming
+Function for Further Data Trimming
 
 1. **Removing Highly Incomplete Rows:**
+
    - Identifies and removes rows that are considered highly incomplete. By eliminating these rows, the dataset becomes more concise and focused on relevant data points.
 
 2. **Limiting the Number of Columns:**
+
    - Restricts the dataset to include only the first 450 columns. This is implemented to reduce computational complexity, speed up the analysis, and narrow the scope of investigation to the most relevant attributes.
+   
 ```{r}
 df_shorten <- function(df){
   # Keep only the first 450 columns
@@ -179,8 +196,10 @@ df_shorten <- function(df){
 
 ```
 
-# Function for Filtering Data by State
+ Function for Filtering Data by State
+ 
 This function filters the DataFrame to retain only rows associated with actual U.S. states.
+
 ```{r}
 state_isolation <- function(df){
   # List of two-letter state abbreviations for all U.S. states
@@ -205,10 +224,13 @@ state_isolation <- function(df){
 ```
 
 Following four functions prepare dataset to facilitate future plotting functions. 
+
 They filter and aggregate data, ensuring that it is well-structured for creating plots and graphs for data visualizations.
 
-# Function for Data Preparation for Bar Plot
+Function for Data Preparation for Bar Plot
+
 This function prepares the dataset to be used in the 'bar_plot' function by filtering and aggregating data related to institutions and their operational status at the state level.
+
 ```{r}
 instit_operations <- function(df){
   # Filter the DataFrame to retain only rows associated with actual U.S. states
@@ -233,8 +255,10 @@ instit_operations <- function(df){
 }
 ```
 
-# Function for Data Preparation for Grouped Bar Plot
+Function for Data Preparation for Grouped Bar Plot
+
 This function filters the dataset to be used in the 'group_bar_plot' function by extracting specific columns, counting occurrences based on degree and state, and ensuring that only states are considered.
+
 ```{r}
 group_bar_filter <- function(df){
   # Extract two columns 'STABBR' (state abbreviation) and 'PREDDEG' (predominant degree)
@@ -255,8 +279,10 @@ group_bar_filter <- function(df){
 }
 ```
 
-# Function for Data Preparation for Ridge Plot
+Function for Data Preparation for Ridge Plot
+
 This function filters the dataset to be used in the 'ridge_plot' function by extracting specific columns related to student demographics and principal institution information.
+
 ```{r}
 ridge_plot_filter <- function(df){
   # Extract columns related to student demographic information (columns 264 to 273)
@@ -274,8 +300,10 @@ ridge_plot_filter <- function(df){
 }
 ```
 
-# Function for Data Preparation for Expense vs. Profit Plot
+Function for Data Preparation for Expense vs. Profit Plot
+
 This function filters the dataset to be used in the 'exp_vs_profit_plot' function by extracting specific columns related to institution finance, including state, degree information, tuition revenue, and instructional expenses.
+
 ```{r}
 exp_vs_profit_filter <- function(df, colname){
   # Create a DataFrame that contains relevant columns (State, Predominant degree, Highest degree, Carnegie classification, Tuition revenue, and Instructional expenses)
@@ -303,7 +331,8 @@ exp_vs_profit_filter <- function(df, colname){
 }
 ```
 
-# Data Filtering and Operations
+Data Filtering and Operations
+
 ```{r}
 # Applying the 'df_filter' function to filter the DataFrame and store the result in 'df_trimmed'
 df_trimmed <- df_filter(df)
@@ -319,9 +348,12 @@ group_plot_filtered_df <- group_bar_filter(filtered_df)
 
 # Applying the 'ridge_plot_filter' function to 'filtered_df' and store the results in 'ridge_plot_df'
 ridge_plot_df <- ridge_plot_filter(filtered_df)
+
+vis_miss(df_trimmed, warn_large_data = FALSE)
 ```
 
-# Z-Score Finance Plot Function
+Z-Score Finance Plot Function
+
 ```{r}
 z_finance_plot <- function(df, fill, colname){
   plot <- ggplot(df, aes(x = STABBR, group = !!sym(colname)))+
@@ -347,7 +379,7 @@ z_finance_plot <- function(df, fill, colname){
 }
 ```
 
-# Filter Data for Open Institutions
+Filter Data for Open Institutions
 
 ```{r}
 df_trimmed <- df_trimmed%>%
@@ -356,8 +388,7 @@ df_trimmed <- df_trimmed%>%
 df_trimmed <- state_isolation(df_trimmed)
 ```
 
-Creating Z-Score Finance Plot for Predominant Degree  \# getting
-difference based on grouping of preddeg
+Creating Z-Score Finance Plot for Predominant Degree getting difference based on grouping of preddeg
 
 ```{r}
 # Filtering the data frame based on 'PREDDEG'
@@ -388,8 +419,7 @@ highdeg_exp_vs_profit_plot <- z_finance_plot(highdeg_exp_vs_profit_df, 'HIGHDEG'
 
 ```
 
-Creating Z-Score Finance Plot for Carnegie Classification \# getting difference based on grouping of
-CCBASIC
+Creating Z-Score Finance Plot for Carnegie Classification, getting difference based on grouping of CCBASIC
 
 ```{r}
 # Creating Z-Score Finance Plot for Carnegie Classification (There's some sort of error here on 351)
@@ -402,47 +432,124 @@ ccbasic_exp_vs_profit_df <- exp_vs_profit_filter(df_trimmed, 'CCBASIC')
 ccbasic_exp_vs_profit_df$zscore <- scale(ccbasic_exp_vs_profit_df$difference)[,1] # normalizing calculations using z-score
 ```
 
-## ANALYSIS
+ANALYSIS
 
-# The bars in the negative means the instructional expenses are greater than the tuition revenue
+The bars in the negative means the instructional expenses are greater than the tuition revenue,this could indicate that they are wanting to spend more towards delivering educational services.
 
-# this could indicate that they are wanting to spend more towards delivering educational services.
+Based on the graphs, it looks like, Associate degree institutions spend more on instructional expenditures then receiving tuition revenue.
 
-# Based on the graphs, it looks like, Associate degree institutions spend more on instructional expenditures then receiving tuition revenue.
+Some factors that could play into this
 
-# Some factors that could play into this
+  1. a majority of associate programs could be public which means they will more likely be funded by the government
 
-# 1. a majority of associate programs could be public which means they will more likely be funded by
+  2. the expenses to get an AA is cheaper than a different type of degree so tuition prices may have a lower threshold
 
-# the government
+Looking at the HIGHDEG filtering on tuition revenue and instruction expenditure, Certificate programs look to have higher revenue in comparison to instruction expenses.
 
-# 2. the expenses to get an AA is cheaper than a different type of degree so tuition prices may have a
+Some factors that could play into this
 
-# lower threshold
+  1. Certificate programs could be online
 
-# Looking at the HIGHDEG filtering on tuition revenue and instruction expenditure, Certificate programs look to
+  2. The time frame to complete it is not as long
 
-# to have higher revenue in comparison to instruction expenses.
+  3. There is not as much upfront cost to get certain materials (for example in a chemistry lab and the need to get ppe,chemicals, etc.)
 
-# Some factors that could play into this
+Unkwn Variables
 
-# 1. Certificate programs could be online
+Does financial aid/ pell grant recipient alter the revenue cost? If so then more people who get these may mean the institution get more federal money from their enrollment.
 
-# 2. The time frame to complete it is not as long
+``` {r}
+finance_df <- cbind(STABBR = filtered_df[,6], filtered_df[,14:15], CCBASIC = filtered_df[,22], TUITFTE = as.numeric(filtered_df[,275]), INEXPFTE = as.numeric(filtered_df[,276]))
 
-# 3. There is not as much upfront cost to get certain materials (for example in a chemistry lab and
+box_plot <- function(df, money, category){
+  summary_data <- summary(df$TUITFTE)
 
-# the need to get ppe,chemicals, etc.)
+  max_height_graph <- (summary_data['Max.']+summary_data['3rd Qu.'])/2
+  df <- df %>%
+    filter(TUITFTE <= max_height_graph)
+  
+  plot <- df %>%
+    ggplot(aes(x=!!sym(category), y= !!sym(money), fill = !!sym(category))) +
+    geom_boxplot(position = 'dodge') +
+    scale_fill_viridis(discrete = TRUE, alpha=0.6, option= 'viridis')+
+    theme_classic() +
+    theme(legend.text = element_text(size = 6), # font text of variables in legend
+        legend.position = 'bottom')+
+    theme(axis.text.x = element_blank())+ 
+    labs(title = sprintf('box plot of %s by %s', money, category))
+  
+  print(plot)
+}
 
-## Unkwn Variables
+violin_plot <- function(df, money, category){
+  summary_data <- summary(df$TUITFTE)
 
-# Does financial aid/ pell grant recipient alter the revenue cost? If so then more people who get these
+  max_height_graph <- (summary_data['Max.']+summary_data['3rd Qu.'])/2
+  df <- df %>%
+    filter(TUITFTE <= max_height_graph)
+  plot <- df %>%
+    ggplot(aes(x=!!sym(category), y= !!sym(money), fill = !!sym(category))) +
+    geom_violin(position = 'dodge') +
+    scale_fill_viridis(discrete = TRUE, alpha=0.6, option= 'viridis')+
+    theme_classic() +
+    theme(legend.text = element_text(size = 6), # font text of variables in legend
+        legend.position = 'bottom')+
+    theme(axis.text.x = element_blank())+
+    labs(title = sprintf('box plot of %s by %s', money, category))
+  
+  print(plot)
+}
 
-# may mean the institution get more federal money from their enrollment.
+cc_rev_box <- box_plot(finance_df, 'TUITFTE', 'CCBASIC')
+cc_exp_box <- box_plot(finance_df, 'INEXPFTE', 'CCBASIC')
+
+pred_rev_box <- box_plot(finance_df, 'TUITFTE', 'PREDDEG')
+pred_exp_box <- box_plot(finance_df, 'INEXPFTE', 'PREDDEG')
+
+high_rev_box <- box_plot(finance_df, 'TUITFTE', 'HIGHDEG')
+high_exp_box <- box_plot(finance_df, 'INEXPFTE', 'HIGHDEG')
+
+pred_exp_violin <- violin_plot(finance_df, 'INEXPFTE', 'PREDDEG')
+
+```
+
+we can see from the graphs that the revenue seems to be signficantly less than the 
+
+In relation to boxplot of TUITFTE
+
+The highest box plot is related to SF 4-Yrs Other Health Professionals, the cost for such a specialized degree may be greater. Medical schools may have a more limited admissions rate which could lead to an increase in price. 
+
+``` {r}
+
+summary_data <- summary(finance_df$INEXPFTE)
+
+max_height_graph <- (summary_data['Max.']+summary_data['3rd Qu.'])/2
+finance_max_threshold <- finance_df %>%
+  filter(INEXPFTE <= max_height_graph)
+
+finance_max_threshold %>%
+  ggplot(aes(x=CCBASIC, y=INEXPFTE, fill = CCBASIC)) +
+  geom_boxplot(position = 'dodge') +
+  scale_fill_viridis(discrete = TRUE, alpha=0.6, option= 'viridis')+
+  theme_classic() +
+  theme(legend.text = element_text(size = 6), # font text of variables in legend
+      legend.position = 'bottom')+
+  theme(axis.text.x = element_blank())
+
+finance_max_threshold %>%
+  ggplot(aes(x=CCBASIC, y=INEXPFTE, fill = CCBASIC)) +
+  geom_violin(position = 'dodge') +
+  scale_fill_viridis(discrete = TRUE, alpha=0.6, option= 'viridis')+
+  theme_classic() +
+  theme(legend.text = element_text(size = 6), # font text of variables in legend
+      legend.position = 'bottom')+
+  theme(axis.text.x = element_blank())
 
 
+```
 
-# Bar Plot for Total, Open, and Closed Institutions
+Bar Plot for Total, Open, and Closed Institutions
+
 ```{r}
 bar_plot <- function(df) {
   titles <- c('Total Institutes', 'Open Institutes', 'Closed Institutes') # Titles for each subplot
@@ -483,11 +590,12 @@ bar_plot <- function(df) {
 combined_plot <- bar_plot(institut_ops)
 ```
 
-# ANALYSIS: Bar Plot for Total, Open, and Closed Institutions
+ANALYSIS: Bar Plot for Total, Open, and Closed Institutions
 
 The purpose of this analysis is to visualize the number of educational institutions in each U.S. state, categorized into three separate plots: one for total institutions, one for open institutions, and one for closed institutions. These plots offer insights into the distribution of institutions across states and highlight significant trends.
 
-# Key Observations:
+Key Observations:
+
 1. **California Dominance:** It's immediately evident that the state of California consistently ranks at the top in all three plots, indicating the highest number of total, open, and closed institutions compared to other states. This dominance is likely due to California's substantial population and its attractiveness as a destination for education, drawing students from across the United States and around the world. Several other factors contributing to this dominance could also include: economic factors, cultural and social factors, educational policies, geographical factors, education quality and more.
 
 2. **New York, Texas, and Florida:** Following California, New York secures the second spot in terms of total and open institutions. This can be attributed to the high population density and the presence of numerous prestigious universities and colleges. Texas and Florida closely follow, mirroring similar population-driven demand for educational institutions.
@@ -548,9 +656,7 @@ group_bar_plot <- function(df) {
 preddeg_plots <- group_bar_plot(group_plot_filtered_df)
 ```
 
-Ridge Plots for Demographic Variables \# Function to create ridge plots
-for different demographic variables \# within each PREDDEG group and
-returns a pdf of all the graphs
+Ridge Plots for Demographic Variables \# Function to create ridge plots for different demographic variables \# within each PREDDEG group and returns a pdf of all the graphs
 
 ```{r}
 ridge_plots <- function(df) {
@@ -587,19 +693,11 @@ ridge_plots <- function(df) {
 dem_ridge_plots <- ridge_plots(ridge_plot_df)
 ```
 
-## ANALYSIS
+ANALYSIS
 
-# Those who identify as white have a more balanced distribution withing all
+Those who identify as white have a more balanced distribution withing all the categories except graduate. There could be an association between access to higher education and identifying as white. There is a lower density of individuals who identity as another race who seek higher education (there is a predominate right skew to all the graphs)
 
-# the categories except graduate. There could be an association between access
-
-# to higher education and identifying as white.
-
-# There is a lower density of individuals who identity as another race who seek
-
-# higher education (there is a predominate right skew to all the graphs)
-
-# Lurking variable: population size of each demographic
+Lurking variable: population size of each demographic
 
 Heatmap for Carnegie Classification vs. Highest Degree \# Function
 creates a heatmap that visually represents the correlation \# between
@@ -642,36 +740,14 @@ predominatevsCCBASIC <- heat_map(predominate_heatmap_data)
 
 ```
 
-## ANALYSIS
+ANALYSIS
 
-# general: -2 looks to be referring to institutions that are certificate
+general: -2 looks to be referring to institutions that are certificate or non-degree grant. Both also have a similar correlation between CCBASIC scores listed as Associate or Special Focus 2-Years and associate degree awarded.
 
-# or non-degree grant. Both also have a similar correlation between CCBASIC
+CCBASIC vs HIGHDEG
 
-# scores listed as Associate or Special Focus 2-Years and associate degree
+Intuitively, there is a better correlation between the CC classification and highest degree awarded. We can see this in the Graduate column where a majority of the lighter colors are associated with masters and doctoral programs. We can see a similar grouping of Special Focus 4-Year institutions and baccalaureate institutions with the Bachelor degree. (I would expect institutions that say 4-years are working towards a bachelor's degree.)
 
-# awarded.
+CCBASIC vs PREDDEG
 
-# CCBASIC vs HIGHDEG
-
-# Intuitively, there is a better correlation between the CC classification and
-
-# highest degree awarded. We can see this in the Graduate column where a majority
-
-# of the lighter colors are associated with masters and doctoral programs. We can
-
-# see a similar grouping of Special Focus 4-Year institutions and baccalaureate
-
-# institutions with the Bachelor degree. (I would expect institutions that say 4-years
-
-# are working towards a bachelor's degree.)
-
-# CCBASIC vs PREDDEG
-
-# In this map we can see that Bachelor degree has a higher correlation with
-
-# baccalaureate, masters, and doctoral institutions. This could be because
-
-# individuals are only looking at getting bachelors, but the institution that they
-
-# go to allows for further studies.
+In this map we can see that Bachelor degree has a higher correlation with baccalaureate, masters, and doctoral institutions. This could be because individuals are only looking at getting bachelors, but the institution that they go to allows for further studies.
