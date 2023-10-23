@@ -642,11 +642,9 @@ group_bar_plot <- function(df) {
     return(cc_dist)
   })
     
-  pdf("preddeg_per_state_plots.pdf")  # Output to a PDF file
   for (i in 1:length(plots)) {
     print(plots[[i]])
-  }
-  dev.off()  # Close PDF device
+  } # Close PDF device
   
   return(plots)
   
@@ -679,12 +677,9 @@ ridge_plots <- function(df) {
       
   })
   
-  # Save each set of density plots to separate PDF files
-  pdf('demographic_plots.pdf')
   for (i in 1:length(plots)) {
       print(plots[[i]])
     }
-  dev.off()
   
   return(plots)
 }
