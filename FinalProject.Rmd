@@ -436,40 +436,43 @@ ccbasic_exp_vs_profit_df$zscore <- scale(ccbasic_exp_vs_profit_df$difference)[,1
 
 # Bar Plot for Total, Open, and Closed Institutions
 ```{r}
-# Initialization: Define titles and an empty list to store individual plots.
-titles <- c('Total Institutes', 'Open Institutes', 'Closed Institutes') # Main title for each plot
-ops_plots <- list() # List to store individual plots
-
-# Loop through the data frames for total, open, and closed institutions.
-#for (ops in 1:length(df)) {
- # data <- df[[ops]] # Get the data frame for the current category
-  #title <- titles[ops] # Retrieve the associated title for the plot
+bar_plot <- function(df) {
+  titles <- c('Total Institutes', 'Open Institutes', 'Closed Institutes') # Titles for each subplot
+  ops_plots <- list() # List to store the three graphs
   
-  # Order the bars in descending order based on the number of institutions in each state.
-  #data <- data %>%
-  #  mutate(STABBR = fct_reorder(STABBR, n))
-  
-  # Create the bar plot for the current category.
-  #ops_plot <- ggplot(data, aes(x = STABBR, y = n, fill = n)) +
-   # geom_bar(stat = 'identity', # Determine how the data should be summarized (height based on value of dataset)
-    #         alpha = 0.7, 
-    #         width = 0.5) +
-    #coord_flip() +
-    #scale_fill_viridis(discrete = FALSE, # Use a continuous coloring system
-     #                  option = 'viridis', # Color palette to be used
-      #                 direction = -1) + # Gradient direction
-    #xlab('') +
-    #ggtitle(title) +
-    #theme_classic() # Apply a classic theme to the plot
+  # Iterate through total, open, and closed institution data frames
+  for (ops in 1:length(df)) {
+    data <- df[[ops]] # Retrieve data frame from the list
+    title <- titles[ops] # Retrieve associated title
     
-  #ops_plots[[ops]] <- ops_plot # Add the current plot to the list of plots
-#}
+    # Order the bars in descending order based on the number of institutions
+    data <- data %>%
+      mutate(STABBR = fct_reorder(STABBR, n))
+    
+    ops_plot <- ggplot(data, aes(x = STABBR, y = n, fill = n)) +
+      geom_bar(stat = 'identity', # Determines how data should be summarized (height based on values)
+               alpha = 0.7, 
+               width = 0.5) +
+      coord_flip() +
+      scale_fill_viridis(discrete = FALSE, # Continuous color scale
+                         option = 'viridis', # Color palette used
+                         direction = -1) + # Gradient direction
+      xlab('') +
+      ggtitle(title) +
+      theme_classic() # Classic theme for the plot
+      
+    ops_plots[[ops]] <- ops_plot # Add the plot to the list
+  }
+  
+  # Combine the three plots into one grid
+  combined_plots <- grid.arrange(grobs = ops_plots, ncol = length(ops_plots))
+  
+  # Return the combined plot
+  return(combined_plots)
+}
 
-# Combine the individual plots into one plot grid.
-#combined_plots <- grid.arrange(grobs = ops_plots, ncol = length(ops_plots))
-
-# Return the combined plot.
-#return(combined_plots)
+# Call the bar_plot function with data on educational institutions
+combined_plot <- bar_plot(institut_ops)
 ```
 
 # ANALYSIS: Bar Plot for Total, Open, and Closed Institutions
