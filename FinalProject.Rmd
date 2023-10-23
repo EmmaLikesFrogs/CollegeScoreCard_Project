@@ -352,32 +352,46 @@ Creating Z-Score Finance Plot for Predominant Degree  \# getting
 difference based on grouping of preddeg
 
 ```{r}
+# Filtering the data frame based on 'PREDDEG'
 preddeg_exp_vs_profit_df <- exp_vs_profit_filter(df_trimmed, 'PREDDEG')
+
+# Calculating the Z-score for the 'difference' column and adding it as a new column 'zscore'
 preddeg_exp_vs_profit_df$zscore <- scale(preddeg_exp_vs_profit_df$difference)[,1] # normalizing calculations using z-score
+
+# Creating a Z-Score Finance Plot for Predominant Degree
 preddeg_exp_vs_profit_plot <- z_finance_plot(preddeg_exp_vs_profit_df, 'PREDDEG', 'zscore')
-#preddeg_exp_vs_profit_subplot <- z_finance_subplot(preddeg_exp_vs_profit_df, 'PREDDEG', 'zscore', 'z_pred_finance_plots.pdf')
+#
+
 ```
 
-Creating Z-Score Finance Plot for Highest Degree (Currently Commented
-Out)
+Creating Z-Score Finance Plot for Highest Degree 
 
 ```{r}
-highdeg_exp_vs_profit_df <- exp_vs_profit_filter(df_trimmed, 'HIGHDEG')%>%
+
+# Filtering the data frame based on 'HIGHDEG' and excluding 'Non-degree'
+highdeg_exp_vs_profit_df <- exp_vs_profit_filter(df_trimmed, 'HIGHDEG') %>%
   filter(HIGHDEG != 'Non-degree')
+
+# Calculating the Z-score for the 'difference' column and adding it as a new column 'zscore'
 highdeg_exp_vs_profit_df$zscore <- scale(highdeg_exp_vs_profit_df$difference)[,1] # normalizing calculations using z-score
 
+# Creating a Z-Score Finance Plot for Highest Degree
 highdeg_exp_vs_profit_plot <- z_finance_plot(highdeg_exp_vs_profit_df, 'HIGHDEG', 'zscore')
-#highdeg_exp_vs_profit_subplot <- z_finance_subplot(highdeg_exp_vs_profit_df, 'HIGHDEG', 'zscore', 'z_high_finance_plots.pdf')
+
 ```
 
-Creating Z-Score Finance Plot for Carnegie Classification (There's some
-sort of error here on 351) \# getting difference based on grouping of
+Creating Z-Score Finance Plot for Carnegie Classification \# getting difference based on grouping of
 CCBASIC
 
 ```{r}
+# Creating Z-Score Finance Plot for Carnegie Classification (There's some sort of error here on 351)
+# getting difference based on grouping of CCBASIC
+
+# Filtering the data frame based on 'CCBASIC'
 ccbasic_exp_vs_profit_df <- exp_vs_profit_filter(df_trimmed, 'CCBASIC')
+
+# Calculating the Z-score for the 'difference' column and adding it as a new column 'zscore'
 ccbasic_exp_vs_profit_df$zscore <- scale(ccbasic_exp_vs_profit_df$difference)[,1] # normalizing calculations using z-score
-#ccbasic_exp_vs_profit_subplot <- z_finance_subplot(ccbasic_exp_vs_profit_df, 'CCBASIC', 'zscore', 'z_ccbasic_finance_plots.pdf')
 ```
 
 ## ANALYSIS
@@ -427,35 +441,35 @@ titles <- c('Total Institutes', 'Open Institutes', 'Closed Institutes') # Main t
 ops_plots <- list() # List to store individual plots
 
 # Loop through the data frames for total, open, and closed institutions.
-for (ops in 1:length(df)) {
-  data <- df[[ops]] # Get the data frame for the current category
-  title <- titles[ops] # Retrieve the associated title for the plot
+#for (ops in 1:length(df)) {
+ # data <- df[[ops]] # Get the data frame for the current category
+  #title <- titles[ops] # Retrieve the associated title for the plot
   
   # Order the bars in descending order based on the number of institutions in each state.
-  data <- data %>%
-    mutate(STABBR = fct_reorder(STABBR, n))
+  #data <- data %>%
+  #  mutate(STABBR = fct_reorder(STABBR, n))
   
   # Create the bar plot for the current category.
-  ops_plot <- ggplot(data, aes(x = STABBR, y = n, fill = n)) +
-    geom_bar(stat = 'identity', # Determine how the data should be summarized (height based on value of dataset)
-             alpha = 0.7, 
-             width = 0.5) +
-    coord_flip() +
-    scale_fill_viridis(discrete = FALSE, # Use a continuous coloring system
-                       option = 'viridis', # Color palette to be used
-                       direction = -1) + # Gradient direction
-    xlab('') +
-    ggtitle(title) +
-    theme_classic() # Apply a classic theme to the plot
+  #ops_plot <- ggplot(data, aes(x = STABBR, y = n, fill = n)) +
+   # geom_bar(stat = 'identity', # Determine how the data should be summarized (height based on value of dataset)
+    #         alpha = 0.7, 
+    #         width = 0.5) +
+    #coord_flip() +
+    #scale_fill_viridis(discrete = FALSE, # Use a continuous coloring system
+     #                  option = 'viridis', # Color palette to be used
+      #                 direction = -1) + # Gradient direction
+    #xlab('') +
+    #ggtitle(title) +
+    #theme_classic() # Apply a classic theme to the plot
     
-  ops_plots[[ops]] <- ops_plot # Add the current plot to the list of plots
-}
+  #ops_plots[[ops]] <- ops_plot # Add the current plot to the list of plots
+#}
 
 # Combine the individual plots into one plot grid.
-combined_plots <- grid.arrange(grobs = ops_plots, ncol = length(ops_plots))
+#combined_plots <- grid.arrange(grobs = ops_plots, ncol = length(ops_plots))
 
 # Return the combined plot.
-return(combined_plots)
+#return(combined_plots)
 ```
 
 # ANALYSIS: Bar Plot for Total, Open, and Closed Institutions
