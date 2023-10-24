@@ -6,7 +6,7 @@ Our project aims to analyse the data of the U.S. education system for the academ
 
 ## Data Source
 
-The data is sourced from the [College Scorecard](https://collegescorecard.ed.gov) initiated by the U.S. Department of Education.
+The [data](https://ncf.instructure.com/courses/7450/files/712104/download?download_frd=1) is sourced from the [College Scorecard](https://collegescorecard.ed.gov) initiated by the U.S. Department of Education.
 
 ## Content
 
