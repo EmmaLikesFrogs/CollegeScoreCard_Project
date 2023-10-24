@@ -72,6 +72,6 @@ We perform several data filtering and operations to prepare the dataset for anal
 In this project we used bar plots, grouped bar plots, ridge plots, and heatmaps to visualize the data for better understanding. Every plot provides description and analysis of patternt observed.
 
 
-## **Conclusion:**
+## Conclusion:
 
-Understanding these patterns is valuable for parents when choosing schools for their children because it provides insights into the educational landscape in the United States. These insights help make informed decisions about educational opportunities and policies.
+In conclusion, our project's visualizations are not just aesthetically pleasing but serve as a means to extract valuable insights from the data. Understanding these patterns is invaluable for parents and students when choosing educational institutions. It empowers them to make informed decisions based on factors like the concentration of institutions, degree offerings, demographics, finansial aspects and more. Ultimately, our data analysis aims to enhance transparency and facilitate data-driven decision-making in the realm of U.S. education.
