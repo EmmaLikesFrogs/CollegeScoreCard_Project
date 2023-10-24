@@ -6,7 +6,8 @@ Our project aims to analyse the data of the U.S. education system for the academ
 
 ## Data Source
 
-The [data](https://ncf.instructure.com/courses/7450/files/712104/download?download_frd=1) is sourced from the [College Scorecard](https://collegescorecard.ed.gov) initiated by the U.S. Department of Education.
+The data is sourced from the [College Scorecard](https://collegescorecard.ed.gov) initiated by the U.S. Department of Education.
+Download [CollegeScorecard.zip](https://ncf.instructure.com/courses/7450/files/712104/download?download_frd=1) and navigate inside the folder. In this analysis we will be working with 'MERGED2021_22_PP.csv' file which contains data for the academic year 2021-2022.
 
 ## Content
 
